@@ -14755,14 +14755,10 @@ function App() {
     _useState20 = _slicedToArray(_useState19, 2),
     view = _useState20[0],
     setView = _useState20[1];
-  var _useState21 = useState({}),
+  var _useState21 = useState(null),
     _useState22 = _slicedToArray(_useState21, 2),
-    collection = _useState22[0],
-    setCollection = _useState22[1];
-  var _useState23 = useState(null),
-    _useState24 = _slicedToArray(_useState23, 2),
-    modalPlayer = _useState24[0],
-    setModalPlayer = _useState24[1];
+    modalPlayer = _useState22[0],
+    setModalPlayer = _useState22[1];
 
   // Reset subcat when group changes
   var handleGroupChange = useCallback(function (g) {
@@ -14775,22 +14771,6 @@ function App() {
     if (groupFilter === "All") return [];
     return GROUPS[groupFilter] || [];
   }, [groupFilter]);
-  var toggleOwned = useCallback(function (id) {
-    setCollection(function (prev) {
-      var cur = prev[id] || {};
-      return _objectSpread(_objectSpread({}, prev), {}, _defineProperty({}, id, _objectSpread(_objectSpread({}, cur), {}, {
-        owned: !cur.owned
-      })));
-    });
-  }, []);
-  var toggleWanted = useCallback(function (id) {
-    setCollection(function (prev) {
-      var cur = prev[id] || {};
-      return _objectSpread(_objectSpread({}, prev), {}, _defineProperty({}, id, _objectSpread(_objectSpread({}, cur), {}, {
-        wanted: !cur.wanted
-      })));
-    });
-  }, []);
   var filtered = useMemo(function () {
     var items = ALL_DATA;
     if (groupFilter !== "All") items = items.filter(function (d) {
@@ -14836,20 +14816,6 @@ function App() {
     });
     return items;
   }, [search, groupFilter, subCatFilter, teamFilter, subFilter, rookieFilter, sortBy]);
-  var ownedCount = Object.values(collection).filter(function (c) {
-    return c.owned;
-  }).length;
-  var wantedCount = Object.values(collection).filter(function (c) {
-    return c.wanted;
-  }).length;
-  var totalBase = ALL_DATA.filter(function (d) {
-    return d.cat === "Base Set";
-  }).length;
-  var ownedBase = ALL_DATA.filter(function (d) {
-    var _collection$d$id;
-    return d.cat === "Base Set" && ((_collection$d$id = collection[d.id]) === null || _collection$d$id === void 0 ? void 0 : _collection$d$id.owned);
-  }).length;
-  var pct = totalBase > 0 ? Math.round(ownedBase / totalBase * 100) : 0;
 
   // Group colors
   var groupColors = {
@@ -14925,58 +14891,7 @@ function App() {
       fontSize: isMobile ? 11 : 13,
       color: "#64748b"
     }
-  }, ALL_DATA.length, " \u5F35\u5361\u7247 \xB7 5 \u5927\u985E \xB7 ", ALL_TEAMS.length, " \u652F\u7403\u968A"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: isMobile ? 10 : 14,
-      display: "flex",
-      gap: isMobile ? 8 : 16,
-      alignItems: "center",
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      minWidth: isMobile ? 140 : 200
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      fontSize: 11,
-      color: "#94a3b8",
-      marginBottom: 4
-    }
-  }, /*#__PURE__*/React.createElement("span", null, "Base Set \u6536\u96C6\u9032\u5EA6"), /*#__PURE__*/React.createElement("span", null, ownedBase, " / ", totalBase, " (", pct, "%)")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      height: 6,
-      background: "rgba(255,255,255,0.06)",
-      borderRadius: 3,
-      overflow: "hidden"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      height: "100%",
-      borderRadius: 3,
-      width: "".concat(pct, "%"),
-      background: "linear-gradient(90deg, #6366f1, #8b5cf6)",
-      transition: "width 0.4s ease"
-    }
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 12
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: "#6ee7b7"
-    }
-  }, "\u2713 \u5DF2\u6709 ", ownedCount), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: "#fbbf24"
-    }
-  }, "\u2605 \u60F3\u8981 ", wantedCount))))), /*#__PURE__*/React.createElement("div", {
+  }, ALL_DATA.length, " \u5F35\u5361\u7247 \xB7 5 \u5927\u985E \xB7 ", ALL_TEAMS.length, " \u652F\u7403\u968A"))), /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 1200,
       margin: "0 auto",
@@ -15252,17 +15167,13 @@ function App() {
       gap: 8
     }
   }, filtered.map(function (card, idx) {
-    var _collection$card$id, _collection$card$id2;
-    var owned = (_collection$card$id = collection[card.id]) === null || _collection$card$id === void 0 ? void 0 : _collection$card$id.owned;
-    var wanted = (_collection$card$id2 = collection[card.id]) === null || _collection$card$id2 === void 0 ? void 0 : _collection$card$id2.wanted;
     var isRookie = card.sub === "Rookie";
     return /*#__PURE__*/React.createElement("div", {
       key: card.id + "-" + idx,
       style: {
         padding: "12px 14px",
         borderRadius: 10,
-        background: owned ? "rgba(34,197,94,0.08)" : "rgba(255,255,255,0.04)",
-        borderLeft: owned ? "3px solid #22c55e" : "3px solid transparent",
+        background: idx % 2 === 0 ? "rgba(255,255,255,0.04)" : "transparent",
         transition: "all 0.15s"
       }
     }, /*#__PURE__*/React.createElement("div", {
@@ -15305,41 +15216,7 @@ function App() {
         fontSize: 10,
         fontWeight: 700
       }
-    }, "RC"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        gap: 4,
-        flexShrink: 0
-      }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: function onClick() {
-        return toggleOwned(card.id);
-      },
-      style: {
-        width: 28,
-        height: 28,
-        borderRadius: 6,
-        border: "none",
-        cursor: "pointer",
-        fontSize: 13,
-        background: owned ? "#22c55e" : "rgba(255,255,255,0.06)",
-        color: owned ? "#fff" : "#64748b"
-      }
-    }, "\u2713"), /*#__PURE__*/React.createElement("button", {
-      onClick: function onClick() {
-        return toggleWanted(card.id);
-      },
-      style: {
-        width: 28,
-        height: 28,
-        borderRadius: 6,
-        border: "none",
-        cursor: "pointer",
-        fontSize: 13,
-        background: wanted ? "#f59e0b" : "rgba(255,255,255,0.06)",
-        color: wanted ? "#fff" : "#64748b"
-      }
-    }, "\u2605"))), /*#__PURE__*/React.createElement("div", {
+    }, "RC")), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         alignItems: "center",
@@ -15391,7 +15268,7 @@ function App() {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "72px minmax(120px,1fr) minmax(160px,220px) 60px minmax(100px,1fr) 80px",
+      gridTemplateColumns: "72px minmax(120px,1fr) minmax(160px,220px) 60px minmax(100px,1fr)",
       gap: 8,
       padding: "10px 16px",
       background: "rgba(255,255,255,0.03)",
@@ -15406,25 +15283,17 @@ function App() {
     style: {
       textAlign: "center"
     }
-  }, "RC"), /*#__PURE__*/React.createElement("span", null, "\u985E\u578B / \u7CFB\u5217"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      textAlign: "center"
-    }
-  }, "\u6536\u85CF")), filtered.map(function (card, idx) {
-    var _collection$card$id3, _collection$card$id4;
-    var owned = (_collection$card$id3 = collection[card.id]) === null || _collection$card$id3 === void 0 ? void 0 : _collection$card$id3.owned;
-    var wanted = (_collection$card$id4 = collection[card.id]) === null || _collection$card$id4 === void 0 ? void 0 : _collection$card$id4.wanted;
+  }, "RC"), /*#__PURE__*/React.createElement("span", null, "\u985E\u578B / \u7CFB\u5217")), filtered.map(function (card, idx) {
     var isRookie = card.sub === "Rookie";
     return /*#__PURE__*/React.createElement("div", {
       key: card.id + "-" + idx,
       style: {
         display: "grid",
-        gridTemplateColumns: "72px minmax(120px,1fr) minmax(160px,220px) 60px minmax(100px,1fr) 80px",
+        gridTemplateColumns: "72px minmax(120px,1fr) minmax(160px,220px) 60px minmax(100px,1fr)",
         gap: 8,
         padding: "10px 16px",
         alignItems: "center",
-        background: owned ? "rgba(34,197,94,0.08)" : idx % 2 === 0 ? "rgba(255,255,255,0.04)" : "transparent",
-        borderLeft: owned ? "3px solid #22c55e" : "3px solid transparent",
+        background: idx % 2 === 0 ? "rgba(255,255,255,0.04)" : "transparent",
         transition: "all 0.15s",
         fontSize: 14
       }
@@ -15506,45 +15375,7 @@ function App() {
         fontWeight: 600,
         whiteSpace: "nowrap"
       }
-    }, card.cat)), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        gap: 4,
-        justifyContent: "center"
-      }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: function onClick() {
-        return toggleOwned(card.id);
-      },
-      title: "\u5DF2\u64C1\u6709",
-      style: {
-        width: 30,
-        height: 30,
-        borderRadius: 6,
-        border: "none",
-        cursor: "pointer",
-        fontSize: 14,
-        background: owned ? "#22c55e" : "rgba(255,255,255,0.06)",
-        color: owned ? "#fff" : "#64748b",
-        transition: "all 0.15s"
-      }
-    }, "\u2713"), /*#__PURE__*/React.createElement("button", {
-      onClick: function onClick() {
-        return toggleWanted(card.id);
-      },
-      title: "\u60F3\u8981",
-      style: {
-        width: 30,
-        height: 30,
-        borderRadius: 6,
-        border: "none",
-        cursor: "pointer",
-        fontSize: 14,
-        background: wanted ? "#f59e0b" : "rgba(255,255,255,0.06)",
-        color: wanted ? "#fff" : "#64748b",
-        transition: "all 0.15s"
-      }
-    }, "\u2605")));
+    }, card.cat)));
   }), filtered.length === 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 60,
