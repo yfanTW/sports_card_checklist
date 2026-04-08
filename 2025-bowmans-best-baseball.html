@@ -8,7 +8,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%);
     min-height: 100vh;
     color: #f1f5f9;
   }
@@ -1009,17 +1009,19 @@ function teamAbbrChip(team) {
 
 function renderExpandedCards(cards, accentColor) {
   if (!cards.length) return '';
-  return `<div style="margin:6px 0 8px 55px;border-left:2px solid ${accentColor}40;padding-left:10px">
+  return `<div style="margin-left:22px;margin-top:4px;margin-bottom:8px;border-left:2px solid #e2e8f0;padding-left:10px">
     ${cards.map((c,i) => {
       const players = getCardPlayers(c);
       const teams = [...new Set(players.map(pl => pl.realTeam || pl.team))];
-      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;background:${i%2===0?'rgba(255,255,255,0.04)':'transparent'};flex-wrap:wrap">
-        <span style="font-family:'SF Mono','Cascadia Code',monospace;color:#64748b;font-size:10px;flex-shrink:0">${c.n}</span>
-        <span style="color:#e2e8f0;font-weight:500;font-size:12px;flex:1;min-width:80px">${c.p}</span>
-        <div style="display:flex;flex-wrap:wrap;gap:3px;flex-shrink:0">
-          ${teams.map(t => teamAbbrChip(t)).join('')}
-          ${c.sub && c.sub !== 'RC' ? badgeHTML(c.sub) : ''}
-          ${catBadgeHTML(c.cat, c.group)}
+      return `<div style="padding:5px 6px;font-size:12px;border-radius:4px;background:${i%2===0?'rgba(248,250,252,0.8)':'transparent'}">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span style="font-family:'SF Mono','Cascadia Code',monospace;color:#94a3b8;font-size:11px;min-width:60px;flex-shrink:0">${c.n}</span>
+          <span style="font-weight:600;color:#334155;flex:1;min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.p}</span>
+          <div style="display:flex;flex-wrap:wrap;gap:3px;flex-shrink:0">
+            ${teams.map(t => teamAbbrChip(t)).join('')}
+            ${c.sub && c.sub !== 'RC' ? badgeHTML(c.sub) : ''}
+            ${catBadgeHTML(c.cat, c.group)}
+          </div>
         </div>
       </div>`;
     }).join('')}
@@ -1074,7 +1076,7 @@ function renderStats(data) {
       ["簽名卡",autoCount,"#10b981"],
       ["球隊數",[...new Set(data.map(d=>d.t))].length,"#f97316"],
     ].map(([label,val,color])=>`
-      <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:8px 14px">
+      <div style="display:flex;align-items:center;gap:8px;background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 14px">
         <span style="font-size:12px;color:#64748b;white-space:nowrap">${label}</span>
         <span style="font-family:'SF Mono','Cascadia Code',monospace;font-size:16px;font-weight:700;color:${color}">${val}</span>
       </div>
@@ -1083,65 +1085,63 @@ function renderStats(data) {
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px">
 
     <!-- Team Ranking -->
-    <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,0.06)">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:10px">球隊出現次數 Top 15</div>
+    <div style="background:#fff;border-radius:10px;padding:14px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:14px">球隊出現次數 Top 15</div>
       ${sortedTeams.map(([team,cnt],i)=>{
         const color = getTeamColor(team);
         const abbr  = getTeamAbbr(team);
         const w = Math.round(cnt/maxTeam*100);
         const key = 'team:' + team;
         const isOpen = !!state.statsExpanded[key];
-        // Cards belonging to this team
         const teamCards = data.filter(d =>
           getCardPlayers(d).some(({team:t, realTeam}) => (realTeam||t) === team)
         );
-        return `<div style="margin-bottom:${isOpen?1:6}px">
-          <div style="cursor:pointer" onclick="toggleStatsExpand('${key.replace(/'/g,"\'")}')">
-            <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
-              <span style="font-size:10px;color:#475569;width:14px;text-align:right;flex-shrink:0">${i+1}</span>
-              <span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;padding:0 5px;border-radius:5px;background:${color};color:#fff;font-size:10px;font-weight:800;letter-spacing:0.5px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.25)">${abbr}</span>
-              <span style="flex:1;font-size:12px;color:#cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${team}</span>
-              <span style="font-size:10px;color:${isOpen?color:'#475569'};transition:transform 0.2s;transform:${isOpen?'rotate(90deg)':'rotate(0)'};display:inline-block;margin-right:2px">▶</span>
-              <span style="font-size:12px;font-weight:700;color:#e2e8f0;font-family:'SF Mono','Cascadia Code',monospace">${cnt}</span>
-            </div>
-            <div style="margin-left:55px;height:4px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden">
-              <div style="height:100%;width:${w}%;background:${color};border-radius:2px;transition:width 0.4s"></div>
+        return `<div style="margin-bottom:4px">
+          <div onclick="toggleStatsExpand('${key.replace(/'/g,"\'")}') " style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;background:${isOpen?'rgba(99,102,241,0.06)':i%2===0?'#f8fafc':'transparent'};transition:background 0.15s">
+            <span style="font-size:10px;color:${isOpen?'#6366f1':'#94a3b8'};transition:transform 0.2s;transform:${isOpen?'rotate(90deg)':'rotate(0deg)'};display:inline-block;width:14px;text-align:center;flex-shrink:0">▶</span>
+            <span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:20px;padding:0 5px;border-radius:4px;background:${color};color:#fff;font-size:10px;font-weight:800;letter-spacing:0.5px;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.15)">${abbr}</span>
+            <span style="flex:1;font-size:12px;font-weight:500;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${team}</span>
+            <span style="font-size:12px;color:#94a3b8;font-weight:600;min-width:28px;text-align:right;font-family:'SF Mono','Cascadia Code',monospace">${cnt}</span>
+          </div>
+          <div style="margin-left:22px;margin-bottom:2px">
+            <div style="height:6px;border-radius:3px;background:#f1f5f9;overflow:hidden">
+              <div style="height:100%;border-radius:3px;width:${w}%;background:${color}cc;min-width:2px;transition:width 0.4s ease"></div>
             </div>
           </div>
           ${isOpen ? renderExpandedCards(teamCards, color) : ''}
         </div>`;
       }).join("")}
-      ${allSortedTeams.length > 15 ? `<button onclick="toggleStatsShowAll('teams')" style="margin-top:8px;width:100%;padding:5px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#64748b;font-size:11px;cursor:pointer;font-family:inherit;transition:all 0.15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">${showAllTeams ? "▲ 收合" : "▼ 顯示全部 " + allSortedTeams.length + " 支球隊"}</button>` : ""}
+      ${allSortedTeams.length > 15 ? `<button onclick="toggleStatsShowAll('teams')" style="margin-top:8px;width:100%;padding:8px 0;border:1px dashed #cbd5e1;border-radius:6px;background:transparent;color:#6366f1;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">${showAllTeams ? "收起（顯示前 15 支）" : "展開全部（共 " + allSortedTeams.length + " 支球隊）"}</button>` : ""}
+
     </div>
 
     <!-- Player Ranking -->
-    <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,0.06)">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:10px">球員出現次數 Top 15</div>
+    <div style="background:#fff;border-radius:10px;padding:14px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:14px">球員出現次數 Top 15</div>
       ${sortedPlayers.map(([player,cnt],i)=>{
         const color = getTeamColor(playerTeam[player]);
         const abbr  = getTeamAbbr(playerTeam[player]);
         const w = Math.round(cnt/maxPlayer*100);
         const key = 'player:' + player;
         const isOpen = !!state.statsExpanded[key];
-        // Cards this player appears on
         const playerCards = data.filter(d => splitPlayers(d.p).includes(player));
-        return `<div style="margin-bottom:${isOpen?1:6}px">
-          <div style="cursor:pointer" onclick="toggleStatsExpand('${key.replace(/'/g,"\'")}')">
-            <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
-              <span style="font-size:10px;color:#475569;width:14px;text-align:right;flex-shrink:0">${i+1}</span>
-              <span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;padding:0 5px;border-radius:5px;background:${color};color:#fff;font-size:10px;font-weight:800;letter-spacing:0.5px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.25)">${abbr}</span>
-              <span style="flex:1;font-size:12px;color:#cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${player}</span>
-              <span style="font-size:10px;color:${isOpen?color:'#475569'};transition:transform 0.2s;transform:${isOpen?'rotate(90deg)':'rotate(0)'};display:inline-block;margin-right:2px">▶</span>
-              <span style="font-size:12px;font-weight:700;color:#e2e8f0;font-family:'SF Mono','Cascadia Code',monospace">${cnt}</span>
-            </div>
-            <div style="margin-left:55px;height:4px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden">
-              <div style="height:100%;width:${w}%;background:${color}cc;border-radius:2px;transition:width 0.4s"></div>
+        return `<div style="margin-bottom:4px">
+          <div onclick="toggleStatsExpand('${key.replace(/'/g,"\'")}') " style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;background:${isOpen?'rgba(99,102,241,0.06)':i%2===0?'#f8fafc':'transparent'};transition:background 0.15s">
+            <span style="font-size:10px;color:${isOpen?'#6366f1':'#94a3b8'};transition:transform 0.2s;transform:${isOpen?'rotate(90deg)':'rotate(0deg)'};display:inline-block;width:14px;text-align:center;flex-shrink:0">▶</span>
+            <span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:20px;padding:0 5px;border-radius:4px;background:${color};color:#fff;font-size:10px;font-weight:800;letter-spacing:0.5px;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.15)">${abbr}</span>
+            <span style="flex:1;font-size:12px;font-weight:500;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${player}</span>
+            <span style="font-size:12px;color:#94a3b8;font-weight:600;min-width:28px;text-align:right;font-family:'SF Mono','Cascadia Code',monospace">${cnt}</span>
+          </div>
+          <div style="margin-left:22px;margin-bottom:2px">
+            <div style="height:6px;border-radius:3px;background:#f1f5f9;overflow:hidden">
+              <div style="height:100%;border-radius:3px;width:${w}%;background:${color}cc;min-width:2px;transition:width 0.4s ease"></div>
             </div>
           </div>
           ${isOpen ? renderExpandedCards(playerCards, color) : ''}
         </div>`;
       }).join("")}
-      ${allSortedPlayers.length > 15 ? `<button onclick="toggleStatsShowAll('players')" style="margin-top:8px;width:100%;padding:5px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#64748b;font-size:11px;cursor:pointer;font-family:inherit;transition:all 0.15s" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">${showAllPlayers ? "▲ 收合" : "▼ 顯示全部 " + allSortedPlayers.length + " 位球員"}</button>` : ""}
+      ${allSortedPlayers.length > 15 ? `<button onclick="toggleStatsShowAll('players')" style="margin-top:8px;width:100%;padding:8px 0;border:1px dashed #cbd5e1;border-radius:6px;background:transparent;color:#6366f1;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">${showAllPlayers ? "收起（顯示前 15 位）" : "展開全部（共 " + allSortedPlayers.length + " 位球員）"}</button>` : ""}
+
     </div>
   </div>`;
 }
@@ -1158,10 +1158,10 @@ function render() {
   const ss = `padding:${M?"7px 10px":"8px 12px"};border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:#1e293b;color:#f1f5f9;font-size:${M?12:13}px;font-weight:500;outline:none;cursor:pointer;min-width:${M?90:120}px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M2 4l4 4 4-4'/%3E%3C%2Fsvg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px`;
 
   const html = `
-  <div style="min-height:100vh;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+  <div style="min-height:100vh;background:linear-gradient(135deg,#1e293b 0%,#334155 50%,#1e293b 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
 
     <!-- STICKY HEADER -->
-    <div style="padding:${M?"16px 12px 12px":"24px 24px 18px"};border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(15,23,42,0.95);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100">
+    <div style="padding:${M?"16px 12px 12px":"24px 24px 18px"};border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(30,41,59,0.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100">
       <div style="max-width:1200px;margin:0 auto">
         <h1 style="margin:0 0 4px;font-size:${M?20:26}px;font-family:Georgia,'Times New Roman',serif;color:#f1f5f9;letter-spacing:-0.5px">2025 Bowman's Best Baseball</h1>
         <p style="margin:0;font-size:${M?11:13}px;color:#64748b">${ALL_DATA.length} 張卡片 · 3 大類 · ${ALL_TEAMS.length} 支球隊</p>
@@ -1183,7 +1183,7 @@ function render() {
           placeholder="搜尋球員、球隊、卡號..."
           value="${state.search.replace(/"/g,'&quot;')}"
           oninput="setSearch(this.value)"
-          style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:14px;outline:none;font-family:inherit"
+          style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid #e2e8f0;background:#1e293b;color:#f1f5f9;border:1px solid rgba(255,255,255,0.2);font-size:14px;outline:none;font-family:inherit"
         />
       </div>
 
@@ -1202,7 +1202,7 @@ function render() {
       <!-- ROW 3: SUB-CAT PILLS -->
       ${availableSubCats.length>0 ? `
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;padding-left:12px;border-left:3px solid ${GROUP_COLORS[state.groupFilter]||"#6366f1"}60">
-        <button onclick="setSubCat('All')" style="padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);font-size:${M?11:12}px;font-weight:600;cursor:pointer;font-family:inherit;background:${state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter==="All"?"#e2e8f0":"#94a3b8"};transition:all 0.2s">全部子類別</button>
+        <button onclick="setSubCat('All')" style="padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);font-size:${M?11:12}px;font-weight:600;cursor:pointer;font-family:inherit;background:${state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter==="All"?"rgba(255,255,255,0.06)":"#94a3b8"};transition:all 0.2s">全部子類別</button>
         ${availableSubCats.map(sc=>{
           const cnt = ALL_DATA.filter(d=>d.group===state.groupFilter&&d.cat===sc).length;
           const gc = GROUP_COLORS[state.groupFilter]||"#6366f1";
@@ -1374,7 +1374,7 @@ function renderModal(playerName) {
                       ${allPlayers.map(({name,team})=>`
                         <span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap">
                           ${teamBadgeHTML(team)}
-                          <span style="font-size:11px;color:${name===playerName?"#e2e8f0":"#64748b"};font-weight:${name===playerName?600:400}">${name}</span>
+                          <span style="font-size:11px;color:${name===playerName?"rgba(255,255,255,0.06)":"#64748b"};font-weight:${name===playerName?600:400}">${name}</span>
                         </span>
                       `).join("")}
                     </div>
