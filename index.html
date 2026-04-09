@@ -325,7 +325,36 @@
     letter-spacing: 0.1em;
   }
 
-  /* ── ANIMATIONS ── */
+  /* ── VISITOR COUNTER ── */
+  .visitor-counter {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .counter-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .counter-item svg {
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  .counter-num {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+  }
   @keyframes fadeDown {
     from { opacity: 0; transform: translateY(-16px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -457,7 +486,24 @@
 
 <footer>
   <p>yfantw · Sports Card Checklist Collection</p>
+  <div class="visitor-counter">
+    <div class="counter-item">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      本站訪客：<span class="counter-num" id="busuanzi_value_site_uv">--</span>
+    </div>
+    <div class="counter-item">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+      </svg>
+      總瀏覽次數：<span class="counter-num" id="busuanzi_value_site_pv">--</span>
+    </div>
+  </div>
 </footer>
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 </body>
 </html>
