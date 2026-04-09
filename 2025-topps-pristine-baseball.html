@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>2025 Topps Pristine Baseball — Complete Checklist</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -299,12 +299,16 @@ function getCardPlayers(card) {
 let state = {
   search: "", groupFilter: "All", subCatFilter: "All", teamFilter: "All",
   subFilter: "All", sortBy: "number", view: "list", modalPlayer: null,
-  isMobile: window.innerWidth < 640, statsExpanded: {}, statsShowAll: {}, rcFilter: "All",
+  isMobile: window.innerWidth < 640, statsExpanded: {}, statsShowAll: {}, rcFilter: "All", _searchTimer: null,
 };
 window.addEventListener('resize', () => { state.isMobile = window.innerWidth < 640; render(); });
 
 // ── ACTIONS ──
-function setSearch(v) { state.search=v; render(); }
+function setSearch(v) {
+  state.search=v;
+  clearTimeout(state._searchTimer);
+  state._searchTimer = setTimeout(()=>render(), 200);
+}
 function setRcFilter(v) { state.rcFilter=v; render(); }
 function setGroup(g) { state.groupFilter=g; state.subCatFilter="All"; render(); }
 function setSubCat(sc) { state.subCatFilter=sc; render(); }
@@ -450,9 +454,9 @@ function render() {
             '<button onclick="setView(\''+v+'\')" style="padding:'+(M?"7px 14px":"8px 18px")+';border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;background:'+(state.view===v?"#6366f1":"rgba(255,255,255,0.04)")+';color:'+(state.view===v?"#fff":"#94a3b8")+';transition:all 0.2s">'+label+'</button>'
           ).join("")}
         </div>
-        <input type="text" placeholder="搜尋球員、球隊、卡號..."
+        <input type="text" id="searchBox" placeholder="搜尋球員、球隊、卡號..."
           value="${state.search.replace(/"/g,'&quot;')}" oninput="setSearch(this.value)"
-          style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:14px;outline:none;font-family:inherit"/>
+          style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:16px;outline:none;font-family:inherit"/>
       </div>
       <div style="display:flex;gap:${M?4:6}px;flex-wrap:wrap;margin-bottom:10px">
         <button onclick="setGroup('All')" style="${btnBase};background:${state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)"};color:${state.groupFilter==="All"?"#fff":"#94a3b8"}">全部 (${groupCounts._total})</button>
@@ -479,13 +483,9 @@ function render() {
             ${ALL_SUBTYPES.map(s=>'<option value="'+s+'" '+(state.subFilter===s?"selected":"")+'>'+s+'</option>').join("")}
           </select>
           ${!M ? '<select onchange="setSort(this.value)" style="'+ss+'"><option value="number" '+(state.sortBy==="number"?"selected":"")+'>按卡號排序</option><option value="player" '+(state.sortBy==="player"?"selected":"")+'>按球員排序</option><option value="team" '+(state.sortBy==="team"?"selected":"")+'>按球隊排序</option></select>' : ""}
-          <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">
-            ${[["All","全部"],["RC","RC"],["Non-RC","非RC"]].map(([v,label])=>
-              '<button onclick="setRcFilter(\''+v+'\')" style="padding:'+(M?"6px 10px":"7px 14px")+';border:none;cursor:pointer;font-size:'+(M?11:12)+'px;font-weight:600;font-family:inherit;background:'+(state.rcFilter===v?(v==="RC"?"#f59e0b":v==="Non-RC"?"#6366f1":"#475569"):"#1e293b")+';color:'+(state.rcFilter===v?"#fff":"#94a3b8")+';transition:all 0.15s">'+label+'</button>'
-            ).join("")}
-          </div>
+          ${!M ? '<div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">'+[["All","全部"],["RC","RC"],["Non-RC","非RC"]].map(([v,label])=>'<button onclick="setRcFilter(\''+v+'\')" style="padding:7px 14px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;background:'+(state.rcFilter===v?(v==="RC"?"#f59e0b":v==="Non-RC"?"#6366f1":"#475569"):"#1e293b")+';color:'+(state.rcFilter===v?"#fff":"#94a3b8")+';transition:all 0.15s">'+label+'</button>').join("")+'</div>' : ""}
         </div>
-        ${M ? '<div style="display:flex;gap:8px"><select onchange="setSort(this.value)" style="'+ss+';flex:1"><option value="number" '+(state.sortBy==="number"?"selected":"")+'>按卡號排序</option><option value="player" '+(state.sortBy==="player"?"selected":"")+'>按球員排序</option><option value="team" '+(state.sortBy==="team"?"selected":"")+'>按球隊排序</option></select></div>' : ""}
+        ${M ? '<div style="display:flex;gap:8px;align-items:center"><select onchange="setSort(this.value)" style="'+ss+';flex:1"><option value="number" '+(state.sortBy==="number"?"selected":"")+'>按卡號排序</option><option value="player" '+(state.sortBy==="player"?"selected":"")+'>按球員排序</option><option value="team" '+(state.sortBy==="team"?"selected":"")+'>按球隊排序</option></select><div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">'+[["All","全部"],["RC","RC"],["Non-RC","非RC"]].map(([v,label])=>'<button onclick="setRcFilter(\''+v+'\')" style="padding:6px 10px;border:none;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;background:'+(state.rcFilter===v?(v==="RC"?"#f59e0b":v==="Non-RC"?"#6366f1":"#475569"):"#1e293b")+';color:'+(state.rcFilter===v?"#fff":"#94a3b8")+';transition:all 0.15s">'+label+'</button>').join("")+'</div></div>' : ""}
       </div>
       <div style="font-size:13px;color:#64748b;margin-bottom:12px">
         顯示 <strong style="color:#94a3b8">${filtered.length}</strong> 張卡片
@@ -496,7 +496,14 @@ function render() {
     </div>
   </div>
   ${state.modalPlayer ? renderModal(state.modalPlayer) : ""}`;
+  const ae = document.activeElement;
+  const wasSearch = ae && ae.id === 'searchBox';
+  const cursorPos = wasSearch ? ae.selectionStart : null;
   document.getElementById('root').innerHTML = html;
+  if (wasSearch) {
+    const el = document.getElementById('searchBox');
+    if (el) { el.focus(); if (cursorPos !== null) el.setSelectionRange(cursorPos, cursorPos); }
+  }
 }
 
 function renderList(filtered, M) {
@@ -592,7 +599,7 @@ function renderModal(playerName) {
   const team = PLAYER_TEAM[playerName] || (singleCard ? singleCard.t : cards[0].t);
   const M = state.isMobile;
 
-  return '<div onclick="if(event.target===this)closeModal()" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:'+(M?'flex-end':'center')+';justify-content:center;padding:'+(M?'0':'20px')+';backdrop-filter:blur(4px)"><div style="background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:'+(M?'12px':'16px')+';width:100%;max-width:580px;max-height:'+(M?'92vh':'85vh')+';overflow-y:auto;padding:'+(M?'20px':'28px')+';position:relative;box-shadow:0 25px 50px rgba(0,0,0,0.5)"><button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8">×</button><h2 style="margin:0 0 8px;font-size:'+(M?20:24)+'px;font-family:Georgia,serif;color:#f1f5f9">'+playerName+'</h2><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:16px">'+teamBadgeHTML(team)+(isRC(playerName)?badgeHTML("RC"):"")+'</div>'+
+  return '<div onclick="if(event.target===this)closeModal()" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:'+(M?'flex-end':'center')+';justify-content:center;padding:'+(M?'0':'20px')+';backdrop-filter:blur(4px)"><div style="background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:'+(M?'16px 16px 0 0':'16px')+';width:100%;max-width:580px;max-height:'+(M?'92vh':'85vh')+';overflow-y:auto;padding:'+(M?'20px 20px calc(20px + env(safe-area-inset-bottom, 0px))':'28px')+';position:relative;box-shadow:0 25px 50px rgba(0,0,0,0.5);-webkit-overflow-scrolling:touch"><button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8;padding:4px 8px;z-index:1">×</button><h2 style="margin:0 0 8px;font-size:'+(M?20:24)+'px;font-family:Georgia,serif;color:#f1f5f9">'+playerName+'</h2><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:16px">'+teamBadgeHTML(team)+(isRC(playerName)?badgeHTML("RC"):"")+'</div>'+
     GROUP_ORDER.filter(g => cards.some(c=>c.group===g)).map(g => {
       const gcol = GROUP_COLORS[g];
       const bycat = {};

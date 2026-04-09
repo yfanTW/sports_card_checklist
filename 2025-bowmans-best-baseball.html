@@ -1223,11 +1223,12 @@ function render() {
           `).join("")}
         </div>
         <input
+          id="search-input"
           type="text"
           placeholder="搜尋球員、球隊、卡號..."
           value="${state.search.replace(/"/g,'&quot;')}"
           oninput="setSearch(this.value)"
-          style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid #e2e8f0;background:#1e293b;color:#f1f5f9;border:1px solid rgba(255,255,255,0.2);font-size:14px;outline:none;font-family:inherit"
+          style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:14px;outline:none;font-family:inherit"
         />
       </div>
 
@@ -1246,7 +1247,7 @@ function render() {
       <!-- ROW 3: SUB-CAT PILLS -->
       ${availableSubCats.length>0 ? `
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;padding-left:12px;border-left:3px solid ${GROUP_COLORS[state.groupFilter]||"#6366f1"}60">
-        <button onclick="setSubCat('All')" style="padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);font-size:${M?11:12}px;font-weight:600;cursor:pointer;font-family:inherit;background:${state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter==="All"?"rgba(255,255,255,0.06)":"#94a3b8"};transition:all 0.2s">全部子類別</button>
+        <button onclick="setSubCat('All')" style="padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);font-size:${M?11:12}px;font-weight:600;cursor:pointer;font-family:inherit;background:${state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter==="All"?"#e2e8f0":"#94a3b8"};transition:all 0.2s">全部子類別</button>
         ${availableSubCats.map(sc=>{
           const cnt = getBaseFiltered().filter(d=>d.group===state.groupFilter&&d.cat===sc).length;
           const gc = GROUP_COLORS[state.groupFilter]||"#6366f1";
@@ -1258,12 +1259,12 @@ function render() {
 
       <!-- ROW 4: DROPDOWNS + RC FILTER -->
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <select onchange="setTeam(this.value)" style="${ss};flex:1;min-width:${M?100:120}px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <select onchange="setTeam(this.value)" style="${ss};flex:1">
             <option value="All">全部球隊</option>
             ${ALL_TEAMS.map(t=>`<option value="${t}" ${state.teamFilter===t?"selected":""}>${t}</option>`).join("")}
           </select>
-          <select onchange="setSub(this.value)" style="${ss};flex:1;min-width:${M?100:120}px">
+          <select onchange="setSub(this.value)" style="${ss};flex:1">
             <option value="All">全部類型</option>
             ${ALL_SUBTYPES
               .filter(s => s !== "RC")
@@ -1274,18 +1275,24 @@ function render() {
             <option value="player" ${state.sortBy==="player"?"selected":""}>按球員排序</option>
             <option value="team" ${state.sortBy==="team"?"selected":""}>按球隊排序</option>
           </select>` : ""}
-          <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">
+          ${!M ? `<div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">
             ${[["All","全部"],["RC","RC"],["Non-RC","非RC"]].map(([v,label])=>`
-              <button onclick="setRcFilter('${v}')" style="padding:${M?"6px 10px":"7px 14px"};border:none;cursor:pointer;font-size:${M?11:12}px;font-weight:600;font-family:inherit;background:${state.rcFilter===v?(v==="RC"?"#f59e0b":v==="Non-RC"?"#6366f1":"#475569"):"#1e293b"};color:${state.rcFilter===v?"#fff":"#94a3b8"};transition:all 0.15s">${label}</button>
+              <button onclick="setRcFilter('${v}')" style="padding:7px 14px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;background:${state.rcFilter===v?(v==="RC"?"#f59e0b":v==="Non-RC"?"#6366f1":"#475569"):"#1e293b"};color:${state.rcFilter===v?"#fff":"#94a3b8"};transition:all 0.15s">${label}</button>
             `).join("")}
-          </div>
+          </div>` : ""}
         </div>
-        ${M ? `<div style="display:flex;gap:8px">
+        ${M ? `
+        <div style="display:flex;gap:8px;align-items:center">
           <select onchange="setSort(this.value)" style="${ss};flex:1">
             <option value="number" ${state.sortBy==="number"?"selected":""}>按卡號排序</option>
             <option value="player" ${state.sortBy==="player"?"selected":""}>按球員排序</option>
             <option value="team" ${state.sortBy==="team"?"selected":""}>按球隊排序</option>
           </select>
+          <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">
+            ${[["All","全部"],["RC","RC"],["非RC","非RC"]].map(([v,label])=>`
+              <button onclick="setRcFilter('${v==="非RC"?"Non-RC":v}')" style="padding:6px 10px;border:none;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;background:${state.rcFilter===(v==="非RC"?"Non-RC":v)?(v==="RC"?"#f59e0b":v==="非RC"?"#6366f1":"#475569"):"#1e293b"};color:${state.rcFilter===(v==="非RC"?"Non-RC":v)?"#fff":"#94a3b8"};transition:all 0.15s">${label}</button>
+            `).join("")}
+          </div>
         </div>` : ""}
       </div>
 
@@ -1304,7 +1311,21 @@ function render() {
   ${state.modalPlayer ? renderModal(state.modalPlayer) : ""}
   `;
 
+  // Remember if search was focused before re-render
+  const searchWasFocused = document.activeElement?.id === 'search-input';
+  const searchSelStart = searchWasFocused ? document.activeElement.selectionStart : null;
+  const searchSelEnd   = searchWasFocused ? document.activeElement.selectionEnd   : null;
+
   document.getElementById('root').innerHTML = html;
+
+  // Restore focus and cursor position after re-render
+  if (searchWasFocused) {
+    const el = document.getElementById('search-input');
+    if (el) {
+      el.focus();
+      try { el.setSelectionRange(searchSelStart, searchSelEnd); } catch(e) {}
+    }
+  }
 }
 
 // ==================== LIST VIEW ====================
@@ -1418,7 +1439,7 @@ function renderModal(playerName) {
                       ${allPlayers.map(({name,team})=>`
                         <span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap">
                           ${teamBadgeHTML(team)}
-                          <span style="font-size:11px;color:${name===playerName?"rgba(255,255,255,0.06)":"#64748b"};font-weight:${name===playerName?600:400}">${name}</span>
+                          <span style="font-size:11px;color:${name===playerName?"#e2e8f0":"#64748b"};font-weight:${name===playerName?600:400}">${name}</span>
                         </span>
                       `).join("")}
                     </div>
