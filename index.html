@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sports Card Checklist Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: rgba(255,255,255,0.08);
+    --accent: #f0b429;
+    --accent2: #e05c2f;
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --card-1: #1e3a5f;
+    --card-2: #1a3d2e;
+    --card-3: #3d1e1e;
+    --card-4: #2a2040;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 80px 40px 60px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(240,180,41,0.04) 0%, transparent 100%);
+    overflow: hidden;
+  }
+
+  header::after {
+    content: 'CARDS';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 20vw, 200px);
+    color: rgba(255,255,255,0.02);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .header-tag {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border: 1px solid rgba(240,180,41,0.3);
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 10vw, 96px);
+    letter-spacing: 0.04em;
+    line-height: 0.95;
+    color: var(--text);
+    animation: fadeDown 0.7s 0.1s ease both;
+    margin-bottom: 16px;
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .header-sub {
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    animation: fadeDown 0.7s 0.2s ease both;
+  }
+
+  /* ── GRID ── */
+  .grid-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 40px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  /* ── CARD ── */
+  .card-link {
+    text-decoration: none;
+    display: block;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    animation: fadeUp 0.6s ease both;
+    cursor: pointer;
+  }
+
+  .card-link:nth-child(1) { animation-delay: 0.1s; --accent-card: #3b82f6; --accent-card-rgb: 59,130,246; }
+  .card-link:nth-child(2) { animation-delay: 0.2s; --accent-card: #10b981; --accent-card-rgb: 16,185,129; }
+  .card-link:nth-child(3) { animation-delay: 0.3s; --accent-card: #f59e0b; --accent-card-rgb: 245,158,11; }
+  .card-link:nth-child(4) { animation-delay: 0.4s; --accent-card: #8b5cf6; --accent-card-rgb: 139,92,246; }
+
+  .card-link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+      rgba(var(--accent-card-rgb), 0.12) 0%,
+      rgba(var(--accent-card-rgb), 0.04) 50%,
+      transparent 100%);
+    z-index: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-link:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 20px 60px rgba(var(--accent-card-rgb), 0.2), 0 4px 16px rgba(0,0,0,0.4);
+  }
+
+  .card-link:hover::before {
+    opacity: 1.5;
+  }
+
+  .card-inner {
+    position: relative;
+    z-index: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.3s ease;
+    overflow: hidden;
+  }
+
+  .card-img {
+    position: absolute;
+    right: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 140px;
+    height: 160px;
+    object-fit: contain;
+    object-position: center;
+    opacity: 0.55;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+    mask-image: linear-gradient(to left, rgba(0,0,0,0.9) 30%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,0.9) 30%, transparent 100%);
+  }
+
+  .card-link:hover .card-img {
+    opacity: 0.85;
+    transform: translateY(-54%) scale(1.05) rotate(2deg);
+  }
+
+  .card-link:hover .card-inner {
+    border-color: rgba(var(--accent-card-rgb), 0.4);
+  }
+
+  /* top accent line */
+  .card-inner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-card), transparent);
+    border-radius: 12px 12px 0 0;
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .card-year {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-card);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: rgba(var(--accent-card-rgb), 0.1);
+    border: 1px solid rgba(var(--accent-card-rgb), 0.25);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .card-arrow {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .card-link:hover .card-arrow {
+    border-color: var(--accent-card);
+    color: var(--accent-card);
+    background: rgba(var(--accent-card-rgb), 0.1);
+    transform: translate(2px, -2px);
+  }
+
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.03em;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .card-brand {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    margin-bottom: 20px;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 400;
+    border: 1px solid rgba(var(--accent-card-rgb), 0.25);
+    color: rgba(var(--accent-card-rgb), 0.9);
+    background: rgba(var(--accent-card-rgb), 0.07);
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 0 40px 60px;
+  }
+
+  .divider-line {
+    width: 60px;
+    height: 1px;
+    background: var(--border);
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 16px;
+  }
+
+  .divider-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 40px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer p {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    header { padding: 60px 24px 48px; }
+    .grid-container { grid-template-columns: 1fr; padding: 48px 24px; gap: 16px; }
+    .card-inner { padding: 24px; min-height: 170px; }
+    .card-title { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">⚾ Baseball Trading Cards</div>
+  <h1>Card <span>Checklist</span></h1>
+  <p class="header-sub">Interactive checklists for modern baseball card sets</p>
+</header>
+
+<div class="grid-container">
+
+  <!-- 1. Bowman's Best 2025 -->
+  <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2025-bowmans-best-baseball.html" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <img class="card-img" src="https://www.cardboardconnection.com/wp-content/uploads/2025/01/2025-Bowmans-Best-Baseball.jpg" alt="2025 Bowman's Best Baseball" onerror="this.style.display='none'">
+      <div class="card-top">
+        <div class="card-arrow">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div class="card-title">2025 Bowman's Best Baseball</div>
+        <div class="card-brand">Topps · Bowman's Best</div>
+        <div class="card-footer">
+          <span class="tag">Base</span>
+          <span class="tag">Autograph</span>
+          <span class="tag">Insert</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 2. Topps Pristine 2025 -->
+  <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2025-topps-pristine-baseball.html" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <img class="card-img" src="https://www.dacardworld.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/2/0/2025-topps-pristine-baseball-hobby-box-x.jpg" alt="2025 Topps Pristine Baseball" onerror="this.style.display='none'">
+      <div class="card-top">
+        <div class="card-arrow">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div class="card-title">2025 Topps Pristine Baseball</div>
+        <div class="card-brand">Topps · Pristine</div>
+        <div class="card-footer">
+          <span class="tag">Base</span>
+          <span class="tag">Autograph</span>
+          <span class="tag">Relic</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 3. Topps Series 1 Japan Edition 2026 -->
+  <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2026-topps-series-1-baseball-japan-edition.html" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <img class="card-img" src="https://images.squarespace-cdn.com/content/v1/5e9a0174bb80c91c3a6e67c5/1736968547225-UZSDCN2M3LXQ4LKJP1ZX/2026-topps-series-1-baseball-mega-box.jpg" alt="2026 Topps Series 1 Japan Edition" onerror="this.style.display='none'">
+      <div class="card-top">
+        <div class="card-arrow">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div class="card-title">2026 Topps Series 1 Japan Edition</div>
+        <div class="card-brand">Topps · Series 1 · 日本限定</div>
+        <div class="card-footer">
+          <span class="tag">Japan Edition</span>
+          <span class="tag">Insert</span>
+          <span class="tag">Autograph</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+  <!-- 4. Bowman 2026 -->
+  <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2026-bowman-baseball.html" target="_blank" rel="noopener">
+    <div class="card-inner">
+      <img class="card-img" src="https://www.diamondcardsonline.com.au/wp-content/uploads/2025/05/2025-Bowman-Baseball-Hobby-Box.jpg" alt="2026 Bowman Baseball" onerror="this.style.display='none'">
+      <div class="card-top">
+        <div class="card-arrow">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div class="card-title">2026 Bowman Baseball</div>
+        <div class="card-brand">Topps · Bowman</div>
+        <div class="card-footer">
+          <span class="tag">Base</span>
+          <span class="tag">Prospect</span>
+          <span class="tag">Chrome Auto</span>
+        </div>
+      </div>
+    </div>
+  </a>
+
+</div>
+
+<div class="divider">
+  <span class="divider-line"></span>
+  <span class="divider-text">4 Sets Available</span>
+  <span class="divider-line"></span>
+</div>
+
+<footer>
+  <p>yfantw · Sports Card Checklist Collection</p>
+</footer>
+
+</body>
+</html>
