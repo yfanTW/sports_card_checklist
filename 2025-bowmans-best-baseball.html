@@ -819,10 +819,11 @@ function getCardPlayers(card) {
   return names.map(name => ({ name, team: PLAYER_TEAM[name] || card.t }));
 }
 
-// RC lookup — a player is RC if and only if they appear in the Base Set with sub="RC"
+// RC lookup — a player is RC if they appear in the Base Set with sub="RC" or sub="Rookie"
+// Supporting both Bowman ("RC") and Topps ("Rookie") labeling conventions
 const RC_PLAYERS = new Set(
   ALL_DATA
-    .filter(d => d.group === "Base" && d.sub === "RC")
+    .filter(d => d.group === "Base" && (d.sub === "RC" || d.sub === "Rookie"))
     .map(d => d.p)
 );
 
@@ -846,6 +847,25 @@ const GROUP_COLORS = {
   "Autograph": "#10b981",
   "Insert": "#f59e0b",
 };
+
+// Historical team → current franchise mapping
+// Not used in Bowman's Best (prospects only), but included for skill compatibility
+// and future Topps-style set support
+const TEAM_LEGACY = {
+  "Brooklyn Dodgers":    "Los Angeles Dodgers",
+  "Montréal Expos":      "Washington Nationals",
+  "California Angels":   "Los Angeles Angels",
+  "Angels":              "Los Angeles Angels",
+  "Florida Marlins":     "Miami Marlins",
+  "Oakland Athletics":   "Athletics",
+  "Washington Senators": "Minnesota Twins",
+};
+function getFranchise(t) { return TEAM_LEGACY[t] || t; }
+function getTeamAliases(currentTeam) {
+  const legacy = Object.entries(TEAM_LEGACY)
+    .filter(([,cur]) => cur === currentTeam).map(([old]) => old);
+  return [currentTeam, ...legacy];
+}
 
 // ==================== STATE ====================
 let state = {
@@ -921,9 +941,33 @@ function getAvailableSubCats() {
   return GROUPS[state.groupFilter] || [];
 }
 
+// Returns ALL_DATA with team/type/RC/search filters applied, but NOT group or subCat.
+// Used to compute dynamic group button counts that respond to active filters.
+function getBaseFiltered() {
+  let items = ALL_DATA;
+  if (state.teamFilter !== "All") items = items.filter(d =>
+    getCardPlayers(d).some(({team, realTeam}) =>
+      team === state.teamFilter || realTeam === state.teamFilter
+    )
+  );
+  if (state.subFilter !== "All") items = items.filter(d=>d.sub===state.subFilter);
+  if (state.rcFilter === "RC")     items = items.filter(d=>splitPlayers(d.p).some(n=>isRC(n)));
+  if (state.rcFilter === "Non-RC") items = items.filter(d=>!splitPlayers(d.p).some(n=>isRC(n)));
+  if (state.search.trim()) {
+    const q = state.search.toLowerCase();
+    items = items.filter(d =>
+      d.p.toLowerCase().includes(q) ||
+      getCardPlayers(d).some(({team})=>team.toLowerCase().includes(q)) ||
+      String(d.n).toLowerCase().includes(q)
+    );
+  }
+  return items;
+}
+
 function getGroupCounts() {
+  const base = getBaseFiltered();
   const counts = {};
-  GROUP_ORDER.forEach(g => { counts[g] = ALL_DATA.filter(d=>d.group===g).length; });
+  GROUP_ORDER.forEach(g => { counts[g] = base.filter(d=>d.group===g).length; });
   return counts;
 }
 
@@ -1190,7 +1234,7 @@ function render() {
       <!-- ROW 2: GROUP FILTERS -->
       <div style="display:flex;gap:${M?4:6}px;flex-wrap:wrap;margin-bottom:10px">
         <button onclick="setGroup('All')" style="padding:${M?"6px 10px":"7px 16px"};border-radius:8px;border:none;font-size:${M?12:13}px;font-weight:700;cursor:pointer;font-family:inherit;background:${state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)"};color:${state.groupFilter==="All"?"#fff":"#94a3b8"};transition:all 0.2s">
-          全部 <span style="font-size:11px;opacity:0.7;margin-left:4px">${ALL_DATA.length}</span>
+          全部 <span style="font-size:11px;opacity:0.7;margin-left:4px">${getBaseFiltered().length}</span>
         </button>
         ${GROUP_ORDER.map(g=>`
           <button onclick="setGroup('${g}')" style="padding:${M?"6px 10px":"7px 16px"};border-radius:8px;border:none;font-size:${M?12:13}px;font-weight:700;cursor:pointer;font-family:inherit;background:${state.groupFilter===g?GROUP_COLORS[g]:"rgba(255,255,255,0.06)"};color:${state.groupFilter===g?"#fff":"#cbd5e1"};transition:all 0.2s;${state.groupFilter!==g?"border-bottom:2px solid "+GROUP_COLORS[g]+"40":""}" >
@@ -1204,7 +1248,7 @@ function render() {
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;padding-left:12px;border-left:3px solid ${GROUP_COLORS[state.groupFilter]||"#6366f1"}60">
         <button onclick="setSubCat('All')" style="padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);font-size:${M?11:12}px;font-weight:600;cursor:pointer;font-family:inherit;background:${state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter==="All"?"rgba(255,255,255,0.06)":"#94a3b8"};transition:all 0.2s">全部子類別</button>
         ${availableSubCats.map(sc=>{
-          const cnt = ALL_DATA.filter(d=>d.group===state.groupFilter&&d.cat===sc).length;
+          const cnt = getBaseFiltered().filter(d=>d.group===state.groupFilter&&d.cat===sc).length;
           const gc = GROUP_COLORS[state.groupFilter]||"#6366f1";
           const active = state.subCatFilter===sc;
           return `<button onclick="setSubCat('${sc.replace(/'/g,"\\'")}')" style="padding:4px 12px;border-radius:999px;border:${active?"1px solid "+gc:"1px solid rgba(255,255,255,0.08)"};font-size:${M?11:12}px;font-weight:500;cursor:pointer;font-family:inherit;background:${active?gc+"22":"transparent"};color:${active?"#f1f5f9":"#94a3b8"};transition:all 0.2s">${sc} <span style="font-size:10px;opacity:0.6">(${cnt})</span></button>`;

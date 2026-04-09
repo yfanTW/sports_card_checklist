@@ -14170,7 +14170,7 @@ function getTeamColor(team) {
 
 // ─── Responsive Hook ─────────────────────────────────────────────────────────
 function useIsMobile() {
-  var breakpoint = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 768;
+  var breakpoint = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 640;
   var _useState = useState(typeof window !== "undefined" ? window.innerWidth < breakpoint : false),
     _useState2 = _slicedToArray(_useState, 2),
     isMobile = _useState2[0],
@@ -14424,7 +14424,8 @@ function RankingCard(_ref10) {
       background: "#fff",
       borderRadius: 12,
       padding: 20,
-      border: "1px solid #e2e8f0"
+      border: "1px solid #e2e8f0",
+      boxShadow: "0 1px 4px rgba(0,0,0,0.08)"
     }
   }, /*#__PURE__*/React.createElement("h3", {
     style: {
@@ -14771,6 +14772,18 @@ function App() {
     if (groupFilter === "All") return [];
     return GROUPS[groupFilter] || [];
   }, [groupFilter]);
+
+  // RC detection from Base Set only (skill spec) — must be before filtered/baseFiltered
+  var RC_PLAYERS = useMemo(function () {
+    return new Set(ALL_DATA.filter(function (d) {
+      return d.group === "Base" && d.sub === "Rookie";
+    }).map(function (d) {
+      return d.p;
+    }));
+  }, []);
+  var isRC = useCallback(function (name) {
+    return RC_PLAYERS.has(name);
+  }, [RC_PLAYERS]);
   var filtered = useMemo(function () {
     var items = ALL_DATA;
     if (groupFilter !== "All") items = items.filter(function (d) {
@@ -14792,10 +14805,10 @@ function App() {
       return d.sub === subFilter;
     });
     if (rookieFilter === "Rookie") items = items.filter(function (d) {
-      return d.sub === "Rookie";
+      return isRC(d.p);
     });
     if (rookieFilter === "Non-Rookie") items = items.filter(function (d) {
-      return d.sub !== "Rookie";
+      return !isRC(d.p);
     });
     if (search.trim()) {
       var q = search.toLowerCase();
@@ -14804,9 +14817,21 @@ function App() {
       });
     }
     if (sortBy === "number") items = _toConsumableArray(items).sort(function (a, b) {
-      var an = parseInt(String(a.n).replace(/\D/g, "")) || 99999;
-      var bn = parseInt(String(b.n).replace(/\D/g, "")) || 99999;
-      return an - bn || String(a.n).localeCompare(String(b.n));
+      var parseCard = function parseCard(n) {
+        var m = String(n).match(/^([A-Za-z\-]*)(\d+)(.*)$/);
+        return m ? {
+          prefix: m[1].toUpperCase(),
+          num: parseInt(m[2]),
+          suffix: m[3]
+        } : {
+          prefix: String(n).toUpperCase(),
+          num: 0,
+          suffix: ''
+        };
+      };
+      var pa = parseCard(a.n),
+        pb = parseCard(b.n);
+      return pa.prefix.localeCompare(pb.prefix) || pa.num - pb.num || pa.suffix.localeCompare(pb.suffix);
     });
     if (sortBy === "player") items = _toConsumableArray(items).sort(function (a, b) {
       return a.p.localeCompare(b.p);
@@ -14826,16 +14851,46 @@ function App() {
     "Relic": "#f97316"
   };
 
-  // Group counts
+  // Base filtered (all filters EXCEPT group/subCat) for dynamic group counts
+  var baseFiltered = useMemo(function () {
+    var items = ALL_DATA;
+    if (teamFilter !== "All") {
+      var opt = TEAM_FILTER_OPTIONS.find(function (o) {
+        return o.current === teamFilter;
+      });
+      var aliases = opt ? opt.aliases : [teamFilter];
+      items = items.filter(function (d) {
+        return aliases.includes(d.t);
+      });
+    }
+    if (subFilter !== "All") items = items.filter(function (d) {
+      return d.sub === subFilter;
+    });
+    if (rookieFilter === "Rookie") items = items.filter(function (d) {
+      return isRC(d.p);
+    });
+    if (rookieFilter === "Non-Rookie") items = items.filter(function (d) {
+      return !isRC(d.p);
+    });
+    if (search.trim()) {
+      var q = search.toLowerCase();
+      items = items.filter(function (d) {
+        return d.p.toLowerCase().includes(q) || d.t.toLowerCase().includes(q) || String(d.n).toLowerCase().includes(q);
+      });
+    }
+    return items;
+  }, [search, teamFilter, subFilter, rookieFilter, isRC]);
+
+  // Dynamic group counts
   var groupCounts = useMemo(function () {
     var counts = {};
     GROUP_ORDER.forEach(function (g) {
-      counts[g] = ALL_DATA.filter(function (d) {
+      counts[g] = baseFiltered.filter(function (d) {
         return d.group === g;
       }).length;
     });
     return counts;
-  }, []);
+  }, [baseFiltered]);
   var px = isMobile ? 12 : 24;
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -14971,13 +15026,7 @@ function App() {
       color: groupFilter === "All" ? "#fff" : "#94a3b8",
       transition: "all 0.2s"
     }
-  }, "\u5168\u90E8 ", /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      opacity: 0.7,
-      marginLeft: 4
-    }
-  }, ALL_DATA.length)), GROUP_ORDER.map(function (g) {
+  }, "\u5168\u90E8 (", baseFiltered.length, ")"), GROUP_ORDER.map(function (g) {
     return /*#__PURE__*/React.createElement("button", {
       key: g,
       onClick: function onClick() {
@@ -14995,13 +15044,7 @@ function App() {
         transition: "all 0.2s",
         borderBottom: groupFilter !== g ? "2px solid ".concat(groupColors[g], "40") : "none"
       }
-    }, g, " ", !isMobile && /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 11,
-        opacity: 0.7,
-        marginLeft: 4
-      }
-    }, groupCounts[g]));
+    }, g, " (", groupCounts[g], ")");
   })), groupFilter !== "All" && availableSubCats.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -15027,7 +15070,7 @@ function App() {
       transition: "all 0.2s"
     }
   }, "\u5168\u90E8\u5B50\u985E\u5225"), availableSubCats.map(function (sc) {
-    var cnt = ALL_DATA.filter(function (d) {
+    var cnt = baseFiltered.filter(function (d) {
       return d.cat === sc;
     }).length;
     return /*#__PURE__*/React.createElement("button", {
@@ -15093,7 +15136,9 @@ function App() {
     })
   }, /*#__PURE__*/React.createElement("option", {
     value: "All"
-  }, "\u5168\u90E8\u985E\u578B"), ALL_SUBTYPES.map(function (s) {
+  }, "\u5168\u90E8\u985E\u578B"), ALL_SUBTYPES.filter(function (s) {
+    return s !== "Rookie" && s !== "RC";
+  }).map(function (s) {
     return /*#__PURE__*/React.createElement("option", {
       key: s,
       value: s
