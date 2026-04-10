@@ -786,13 +786,30 @@ let state={
 };
 window.addEventListener('resize',()=>{state.isMobile=window.innerWidth<640;render();});
 
-function setSearch(v){
-  state.search=v;
-  const el=document.activeElement;
-  const sel=el&&el.id==='search-input'?{start:el.selectionStart,end:el.selectionEnd}:null;
-  render();
-  if(sel){const inp=document.getElementById('search-input');if(inp){inp.focus();inp.setSelectionRange(sel.start,sel.end);}}
+// ── Search input with IME guard + mobile debounce ──
+let _isComposing = false, _searchDebounce = null;
+
+function handleSearchInput(el) {
+  if (_isComposing) return;
+  state.search = el.value;
+  if (state.isMobile) {
+    clearTimeout(_searchDebounce);
+    _searchDebounce = setTimeout(() => render(), 180);
+  } else render();
 }
+
+document.addEventListener('compositionstart', () => { _isComposing = true; });
+document.addEventListener('compositionend', (e) => {
+  _isComposing = false;
+  const el = e.target && e.target.id === 'search-input' ? e.target : document.getElementById('search-input');
+  if (el) {
+    state.search = el.value;
+    if (state.isMobile) {
+      clearTimeout(_searchDebounce);
+      _searchDebounce = setTimeout(() => render(), 180);
+    } else render();
+  }
+});
 function setRcFilter(v){state.rcFilter=v;render();}
 function setGroup(g){state.groupFilter=g;state.subCatFilter="All";render();}
 function setSubCat(sc){state.subCatFilter=sc;render();}
@@ -826,7 +843,7 @@ function getFiltered(){
   return items;
 }
 
-function getFilteredExceptGroup(){
+function getBaseFiltered(){
   let items=ALL_DATA;
   if(state.teamFilter!=="All") items=items.filter(d=>getCardPlayers(d).some(({team,realTeam})=>team===state.teamFilter||realTeam===state.teamFilter));
   if(state.subFilter!=="All") items=items.filter(d=>d.sub===state.subFilter);
@@ -836,8 +853,16 @@ function getFilteredExceptGroup(){
   return items;
 }
 function getGroupCounts(){
-  const base=getFilteredExceptGroup();
+  const base=getBaseFiltered();
   const c={};GROUP_ORDER.forEach(g=>{c[g]=base.filter(d=>d.group===g).length;});
+  c._total=base.length;
+  return c;
+}
+function getSubCatCounts(group){
+  const base=getBaseFiltered();
+  const subs=GROUPS[group]||[];
+  const c={};
+  subs.forEach(sc=>{c[sc]=base.filter(d=>d.cat===sc).length;});
   return c;
 }
 function getAvailableSubCats(){
@@ -1076,20 +1101,19 @@ function render(){
         <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1)">
           ${[["list","清單"],["stats","統計"]].map(([v,label])=>`<button onclick="setView('${v}')" style="padding:${M?"7px 14px":"8px 18px"};border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;background:${state.view===v?"#6366f1":"rgba(255,255,255,0.04)"};color:${state.view===v?"#fff":"#94a3b8"};transition:all 0.2s">${label}</button>`).join("")}
         </div>
-        <input type="text" placeholder="搜尋球員、球隊、卡號..." value="${state.search.replace(/"/g,'&quot;')}" id="search-input" oninput="setSearch(this.value)" onchange="setSearch(this.value)" style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:14px;outline:none;font-family:inherit"/>
+        <input id="search-input" type="text" placeholder="搜尋球員、球隊、卡號..." value="${state.search.replace(/"/g,'&quot;')}" oninput="handleSearchInput(this)" oncompositionend="handleSearchInput(this)" style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:14px;outline:none;font-family:inherit"/>
       </div>
       <!-- GROUP BUTTONS -->
-      <div style="display:flex;gap:${M?4:6}px;flex-wrap:wrap;margin-bottom:10px">
-        <button onclick="setGroup('All')" style="padding:${M?"6px 10px":"7px 14px"};border-radius:8px;border:none;cursor:pointer;font-size:${M?12:13}px;font-weight:600;font-family:inherit;background:${state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)"};color:${state.groupFilter==="All"?"#fff":"#94a3b8"};transition:all 0.2s">全部 (${getFilteredExceptGroup().length})</button>
+      <div id="group-buttons" style="display:flex;gap:${M?4:6}px;flex-wrap:wrap;margin-bottom:10px">
+        <button onclick="setGroup('All')" style="padding:${M?"6px 10px":"7px 14px"};border-radius:8px;border:none;cursor:pointer;font-size:${M?12:13}px;font-weight:600;font-family:inherit;background:${state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)"};color:${state.groupFilter==="All"?"#fff":"#94a3b8"};transition:all 0.2s">全部 (${groupCounts._total})</button>
         ${GROUP_ORDER.map(g=>`<button onclick="setGroup('${g}')" style="padding:${M?"6px 10px":"7px 14px"};border-radius:8px;border:none;cursor:pointer;font-size:${M?12:13}px;font-weight:600;font-family:inherit;background:${state.groupFilter===g?GROUP_COLORS[g]:"rgba(255,255,255,0.06)"};color:${state.groupFilter===g?"#fff":"#94a3b8"};transition:all 0.2s">${g} (${groupCounts[g]})</button>`).join("")}
       </div>
       <!-- SUB-CAT PILLS -->
+      <div id="subcat-pills">
       ${availableSubCats.length>0?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;padding-left:12px;border-left:3px solid ${GROUP_COLORS[state.groupFilter]||"#6366f1"}60">
-        <button onclick="setSubCat('All')" style="padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:${state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter==="All"?"#e2e8f0":"#64748b"};font-size:12px;font-weight:500;cursor:pointer;font-family:inherit">全部 (${getFilteredExceptGroup().filter(d=>d.group===state.groupFilter).length})</button>
-        ${availableSubCats.map(sc=>{
-          const cnt=getFilteredExceptGroup().filter(d=>d.group===state.groupFilter&&d.cat===sc).length;
-          return`<button onclick="setSubCat('${sc.replace(/'/g,"\\'")}') " style="padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:${state.subCatFilter===sc?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter===sc?"#e2e8f0":"#64748b"};font-size:12px;font-weight:500;cursor:pointer;font-family:inherit">${sc} (${cnt})</button>`;}).join("")}
+        ${(()=>{const scc=getSubCatCounts(state.groupFilter);const base=getBaseFiltered().filter(d=>d.group===state.groupFilter);return `<button onclick="setSubCat('All')" style="padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:${state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter==="All"?"#e2e8f0":"#64748b"};font-size:12px;font-weight:500;cursor:pointer;font-family:inherit">全部 (${base.length})</button>`+availableSubCats.map(sc=>`<button onclick="setSubCat('${sc.replace(/'/g,"\\'")}') " style="padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:${state.subCatFilter===sc?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter===sc?"#e2e8f0":"#64748b"};font-size:12px;font-weight:500;cursor:pointer;font-family:inherit">${sc} (${scc[sc]||0})</button>`).join("");})()}
       </div>`:""}
+      </div>
       <!-- FILTERS -->
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -1109,16 +1133,47 @@ function render(){
         ${M?`<div style="display:flex;gap:8px"><select onchange="setSort(this.value)" style="${ss};flex:1"><option value="number" ${state.sortBy==="number"?"selected":""}>按卡號排序</option><option value="player" ${state.sortBy==="player"?"selected":""}>按球員排序</option><option value="team" ${state.sortBy==="team"?"selected":""}>按球隊排序</option></select></div>`:""}
       </div>
       <!-- RESULT COUNT -->
-      <div style="font-size:13px;color:#64748b;margin-bottom:12px">
+      <div id="result-count" style="font-size:13px;color:#64748b;margin-bottom:12px">
         顯示 <strong style="color:#94a3b8">${filtered.length}</strong> 張卡片
         ${state.search||state.groupFilter!=="All"||state.teamFilter!=="All"||state.subFilter!=="All"||state.rcFilter!=="All"?`<button onclick="clearFilters()" style="margin-left:10px;padding:2px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;font-size:11px;cursor:pointer;font-family:inherit">清除篩選</button>`:""}
       </div>
-      ${state.view==="stats"?renderStats(filtered):renderList(filtered,M)}
+      <div id="dynamic-content">${state.view==="stats"?renderStats(filtered):renderList(filtered,M)}</div>
     </div>
   </div>
   ${state.modalPlayer?renderModal(state.modalPlayer):""}
   `;
-  document.getElementById('root').innerHTML=html;
+
+  // ── Smart DOM update (Mobile Search Keyboard Fix) ──
+  const root = document.getElementById('root');
+  const prevSearch = document.getElementById('search-input');
+  const searchHadFocus = prevSearch && document.activeElement === prevSearch;
+
+  if (searchHadFocus && state.isMobile) {
+    var dynamicEl = document.getElementById('dynamic-content');
+    if (dynamicEl) {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      var newDynamic = tmp.querySelector('#dynamic-content');
+      if (newDynamic) {
+        dynamicEl.innerHTML = newDynamic.innerHTML;
+        ['result-count','group-buttons','subcat-pills'].forEach(function(id) {
+          var o = document.getElementById(id);
+          var n = tmp.querySelector('#'+id);
+          if (o && n) o.innerHTML = n.innerHTML;
+          else if (!n && o) o.innerHTML = '';
+        });
+        return;
+      }
+    }
+  }
+
+  var selStart = prevSearch ? prevSearch.selectionStart : null;
+  var selEnd   = prevSearch ? prevSearch.selectionEnd   : null;
+  root.innerHTML = html;
+  if (searchHadFocus && !state.isMobile) {
+    var el = document.getElementById('search-input');
+    if (el) { el.focus(); try{el.setSelectionRange(selStart,selEnd);}catch(e){} }
+  }
 }
 render();
 </script>

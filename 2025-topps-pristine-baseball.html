@@ -22,7 +22,9 @@
 </style>
 </head>
 <body>
+<div id="app-header"></div>
 <div id="root"></div>
+<div id="modal-root"></div>
 <script>
 
 // ── TEAM DATA ──
@@ -301,7 +303,7 @@ let state = {
   subFilter: "All", sortBy: "number", view: "list", modalPlayer: null,
   isMobile: window.innerWidth < 640, statsExpanded: {}, statsShowAll: {}, rcFilter: "All", _searchTimer: null,
 };
-window.addEventListener('resize', () => { state.isMobile = window.innerWidth < 640; render(); });
+// resize handled after clearFilters
 
 // ── ACTIONS ──
 function setSearch(v) {
@@ -323,8 +325,17 @@ function toggleStatsShowAll(key) { state.statsShowAll[key]=!state.statsShowAll[k
 function clearFilters() {
   state.search=""; state.groupFilter="All"; state.subCatFilter="All";
   state.teamFilter="All"; state.subFilter="All"; state.rcFilter="All";
+  const sb = document.getElementById('searchBox');
+  if (sb) sb.value = "";
   render();
 }
+
+window.addEventListener('resize', () => {
+  const wasMobile = state.isMobile;
+  state.isMobile = window.innerWidth < 640;
+  if (wasMobile !== state.isMobile) { _headerBuilt = false; }
+  render();
+});
 
 // ── FILTER ──
 function getFiltered() {
@@ -430,80 +441,112 @@ function catBadgeHTML(cat, group) {
 }
 
 // ── RENDER ──
-function render() {
+function renderHeader() {
   const M = state.isMobile;
-  const filtered = getFiltered();
-  const groupCounts = getGroupCounts();
-  const availableSubCats = getAvailableSubCats();
-  const px = M ? 12 : 24;
   const ss = 'padding:'+(M?"7px 10px":"8px 12px")+';border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:#1e293b;color:#f1f5f9;font-size:'+(M?12:13)+'px;font-weight:500;outline:none;cursor:pointer;min-width:'+(M?90:120)+'px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'%3E%3Cpath fill=\'%2394a3b8\' d=\'M2 4l4 4 4-4\'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px';
-  const btnBase = 'padding:'+(M?"6px 10px":"7px 14px")+';border:none;border-radius:8px;cursor:pointer;font-size:'+(M?11:12)+'px;font-weight:600;font-family:inherit;transition:all 0.15s';
-
-  const html = `
-  <div style="min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
+  const px = M ? 12 : 24;
+  document.getElementById('app-header').innerHTML = `
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">
     <div style="padding:${M?"16px 12px 12px":"24px 24px 18px"};border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(30,41,59,0.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100">
       <div style="max-width:1200px;margin:0 auto">
         <h1 style="margin:0 0 4px;font-size:${M?20:26}px;font-family:Georgia,'Times New Roman',serif;color:#f1f5f9;letter-spacing:-0.5px">2025 Topps Pristine Baseball</h1>
-        <p style="margin:0;font-size:${M?11:13}px;color:#64748b">${ALL_DATA.length} 張卡片 · ${GROUP_ORDER.filter(g=>groupCounts[g]>0).length} 大類 · ${ALL_TEAMS.length} 支球隊</p>
+        <p style="margin:0;font-size:${M?11:13}px;color:#64748b" id="headerSubtitle"></p>
       </div>
     </div>
-    <div style="max-width:1200px;margin:0 auto;padding:16px ${px}px">
+    <div style="max-width:1200px;margin:0 auto;padding:16px ${px}px 0">
       <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
         <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1)">
           ${[["list","清單"],["stats","統計"]].map(([v,label])=>
-            '<button onclick="setView(\''+v+'\')" style="padding:'+(M?"7px 14px":"8px 18px")+';border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;background:'+(state.view===v?"#6366f1":"rgba(255,255,255,0.04)")+';color:'+(state.view===v?"#fff":"#94a3b8")+';transition:all 0.2s">'+label+'</button>'
+            '<button onclick="setView(\''+v+'\')" id="viewBtn_'+v+'" style="padding:'+(M?"7px 14px":"8px 18px")+';border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:all 0.2s">'+label+'</button>'
           ).join("")}
         </div>
         <input type="text" id="searchBox" placeholder="搜尋球員、球隊、卡號..."
-          value="${state.search.replace(/"/g,'&quot;')}" oninput="setSearch(this.value)"
+          oninput="setSearch(this.value)"
           style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:16px;outline:none;font-family:inherit"/>
       </div>
-      <div style="display:flex;gap:${M?4:6}px;flex-wrap:wrap;margin-bottom:10px">
-        <button onclick="setGroup('All')" style="${btnBase};background:${state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)"};color:${state.groupFilter==="All"?"#fff":"#94a3b8"}">全部 (${groupCounts._total})</button>
-        ${GROUP_ORDER.filter(g=>groupCounts[g]>0).map(g=>
-          '<button onclick="setGroup(\''+g+'\')" style="'+btnBase+';background:'+(state.groupFilter===g?GROUP_COLORS[g]:"rgba(255,255,255,0.06)")+';color:'+(state.groupFilter===g?"#fff":"#94a3b8")+'">'+g+' ('+groupCounts[g]+')</button>'
-        ).join("")}
-      </div>
-      ${availableSubCats.length>0 ? `
-      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;padding-left:12px;border-left:3px solid ${(GROUP_COLORS[state.groupFilter]||"#6366f1")}60">
-        <button onclick="setSubCat('All')" style="${btnBase};background:${state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"rgba(255,255,255,0.04)"};color:${state.subCatFilter==="All"?"#e2e8f0":"#64748b"}">全部子類別</button>
-        ${availableSubCats.map(sc=>{
+      <div id="groupButtons" style="display:flex;gap:${M?4:6}px;flex-wrap:wrap;margin-bottom:10px"></div>
+      <div id="subCatPills"></div>
+      <div id="filterRow"></div>
+      <div id="resultCount" style="font-size:13px;color:#64748b;margin-bottom:12px"></div>
+    </div>
+  </div>`;
+  document.getElementById('searchBox').value = state.search;
+}
+
+function updateHeaderControls() {
+  const M = state.isMobile;
+  const groupCounts = getGroupCounts();
+  const availableSubCats = getAvailableSubCats();
+  const filtered = getFiltered();
+  const ss = 'padding:'+(M?"7px 10px":"8px 12px")+';border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:#1e293b;color:#f1f5f9;font-size:'+(M?12:13)+'px;font-weight:500;outline:none;cursor:pointer;min-width:'+(M?90:120)+'px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'%3E%3Cpath fill=\'%2394a3b8\' d=\'M2 4l4 4 4-4\'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px';
+  const btnBase = 'padding:'+(M?"6px 10px":"7px 14px")+';border:none;border-radius:8px;cursor:pointer;font-size:'+(M?11:12)+'px;font-weight:600;font-family:inherit;transition:all 0.15s';
+
+  // Subtitle
+  document.getElementById('headerSubtitle').innerHTML = ALL_DATA.length+' 張卡片 · '+GROUP_ORDER.filter(g=>groupCounts[g]>0).length+' 大類 · '+ALL_TEAMS.length+' 支球隊';
+
+  // View toggle
+  ["list","stats"].forEach(v=>{
+    const btn=document.getElementById('viewBtn_'+v);
+    if(btn){btn.style.background=state.view===v?"#6366f1":"rgba(255,255,255,0.04)";btn.style.color=state.view===v?"#fff":"#94a3b8";}
+  });
+
+  // Group buttons
+  document.getElementById('groupButtons').innerHTML =
+    '<button onclick="setGroup(\'All\')" style="'+btnBase+';background:'+(state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)")+';color:'+(state.groupFilter==="All"?"#fff":"#94a3b8")+'">全部 ('+groupCounts._total+')</button>'+
+    GROUP_ORDER.filter(g=>groupCounts[g]>0).map(g=>
+      '<button onclick="setGroup(\''+g+'\')" style="'+btnBase+';background:'+(state.groupFilter===g?GROUP_COLORS[g]:"rgba(255,255,255,0.06)")+';color:'+(state.groupFilter===g?"#fff":"#94a3b8")+'">'+g+' ('+groupCounts[g]+')</button>'
+    ).join("");
+
+  // Sub-cat pills
+  if (availableSubCats.length>0) {
+    document.getElementById('subCatPills').innerHTML =
+      '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;padding-left:12px;border-left:3px solid '+(GROUP_COLORS[state.groupFilter]||"#6366f1")+'60">'+
+        '<button onclick="setSubCat(\'All\')" style="'+btnBase+';background:'+(state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"rgba(255,255,255,0.04)")+';color:'+(state.subCatFilter==="All"?"#e2e8f0":"#64748b")+'">全部子類別</button>'+
+        availableSubCats.map(sc=>{
           const cnt=ALL_DATA.filter(d=>d.cat===sc).length;
           return '<button onclick="setSubCat(\''+sc.replace(/'/g,"\\'")+'\')" style="'+btnBase+';background:'+(state.subCatFilter===sc?"rgba(255,255,255,0.12)":"rgba(255,255,255,0.04)")+';color:'+(state.subCatFilter===sc?"#e2e8f0":"#64748b")+'">'+sc+' ('+cnt+')</button>';
-        }).join("")}
-      </div>` : ""}
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <select onchange="setTeam(this.value)" style="${ss};flex:1;min-width:${M?100:120}px">
-            <option value="All">全部球隊</option>
-            ${ALL_TEAMS.map(t=>'<option value="'+t+'" '+(state.teamFilter===t?"selected":"")+'>'+t+'</option>').join("")}
-          </select>
-          <select onchange="setSub(this.value)" style="${ss};flex:1;min-width:${M?100:120}px">
-            <option value="All">全部類型</option>
-            ${ALL_SUBTYPES.map(s=>'<option value="'+s+'" '+(state.subFilter===s?"selected":"")+'>'+s+'</option>').join("")}
-          </select>
-          ${!M ? '<select onchange="setSort(this.value)" style="'+ss+'"><option value="number" '+(state.sortBy==="number"?"selected":"")+'>按卡號排序</option><option value="player" '+(state.sortBy==="player"?"selected":"")+'>按球員排序</option><option value="team" '+(state.sortBy==="team"?"selected":"")+'>按球隊排序</option></select>' : ""}
-          ${!M ? '<div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">'+[["All","全部"],["RC","RC"],["Non-RC","非RC"]].map(([v,label])=>'<button onclick="setRcFilter(\''+v+'\')" style="padding:7px 14px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;background:'+(state.rcFilter===v?(v==="RC"?"#f59e0b":v==="Non-RC"?"#6366f1":"#475569"):"#1e293b")+';color:'+(state.rcFilter===v?"#fff":"#94a3b8")+';transition:all 0.15s">'+label+'</button>').join("")+'</div>' : ""}
-        </div>
-        ${M ? '<div style="display:flex;gap:8px;align-items:center"><select onchange="setSort(this.value)" style="'+ss+';flex:1"><option value="number" '+(state.sortBy==="number"?"selected":"")+'>按卡號排序</option><option value="player" '+(state.sortBy==="player"?"selected":"")+'>按球員排序</option><option value="team" '+(state.sortBy==="team"?"selected":"")+'>按球隊排序</option></select><div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">'+[["All","全部"],["RC","RC"],["Non-RC","非RC"]].map(([v,label])=>'<button onclick="setRcFilter(\''+v+'\')" style="padding:6px 10px;border:none;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;background:'+(state.rcFilter===v?(v==="RC"?"#f59e0b":v==="Non-RC"?"#6366f1":"#475569"):"#1e293b")+';color:'+(state.rcFilter===v?"#fff":"#94a3b8")+';transition:all 0.15s">'+label+'</button>').join("")+'</div></div>' : ""}
-      </div>
-      <div style="font-size:13px;color:#64748b;margin-bottom:12px">
-        顯示 <strong style="color:#94a3b8">${filtered.length}</strong> 張卡片
-        ${state.search||state.groupFilter!=="All"||state.teamFilter!=="All"||state.subFilter!=="All"||state.rcFilter!=="All"
-          ? '<button onclick="clearFilters()" style="margin-left:10px;padding:2px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;font-size:11px;cursor:pointer;font-family:inherit">清除篩選</button>' : ""}
-      </div>
-      ${state.view==="stats" ? renderStats(filtered) : renderList(filtered, M)}
-    </div>
-  </div>
-  ${state.modalPlayer ? renderModal(state.modalPlayer) : ""}`;
-  const ae = document.activeElement;
-  const wasSearch = ae && ae.id === 'searchBox';
-  const cursorPos = wasSearch ? ae.selectionStart : null;
-  document.getElementById('root').innerHTML = html;
-  if (wasSearch) {
-    const el = document.getElementById('searchBox');
-    if (el) { el.focus(); if (cursorPos !== null) el.setSelectionRange(cursorPos, cursorPos); }
+        }).join("")+
+      '</div>';
+  } else {
+    document.getElementById('subCatPills').innerHTML = '';
   }
+
+  // Filter row
+  document.getElementById('filterRow').innerHTML =
+    '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+
+        '<select onchange="setTeam(this.value)" style="'+ss+';flex:1;min-width:'+(M?100:120)+'px">'+
+          '<option value="All">全部球隊</option>'+
+          ALL_TEAMS.map(t=>'<option value="'+t+'" '+(state.teamFilter===t?"selected":"")+'>'+t+'</option>').join("")+
+        '</select>'+
+        '<select onchange="setSub(this.value)" style="'+ss+';flex:1;min-width:'+(M?100:120)+'px">'+
+          '<option value="All">全部類型</option>'+
+          ALL_SUBTYPES.map(s=>'<option value="'+s+'" '+(state.subFilter===s?"selected":"")+'>'+s+'</option>').join("")+
+        '</select>'+
+        (!M ? '<select onchange="setSort(this.value)" style="'+ss+'"><option value="number" '+(state.sortBy==="number"?"selected":"")+'>按卡號排序</option><option value="player" '+(state.sortBy==="player"?"selected":"")+'>按球員排序</option><option value="team" '+(state.sortBy==="team"?"selected":"")+'>按球隊排序</option></select>' : "")+
+        (!M ? '<div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">'+[["All","全部"],["RC","RC"],["Non-RC","非RC"]].map(([v,label])=>'<button onclick="setRcFilter(\''+v+'\')" style="padding:7px 14px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;background:'+(state.rcFilter===v?(v==="RC"?"#f59e0b":v==="Non-RC"?"#6366f1":"#475569"):"#1e293b")+';color:'+(state.rcFilter===v?"#fff":"#94a3b8")+';transition:all 0.15s">'+label+'</button>').join("")+'</div>' : "")+
+      '</div>'+
+      (M ? '<div style="display:flex;gap:8px;align-items:center"><select onchange="setSort(this.value)" style="'+ss+';flex:1"><option value="number" '+(state.sortBy==="number"?"selected":"")+'>按卡號排序</option><option value="player" '+(state.sortBy==="player"?"selected":"")+'>按球員排序</option><option value="team" '+(state.sortBy==="team"?"selected":"")+'>按球隊排序</option></select><div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">'+[["All","全部"],["RC","RC"],["Non-RC","非RC"]].map(([v,label])=>'<button onclick="setRcFilter(\''+v+'\')" style="padding:6px 10px;border:none;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;background:'+(state.rcFilter===v?(v==="RC"?"#f59e0b":v==="Non-RC"?"#6366f1":"#475569"):"#1e293b")+';color:'+(state.rcFilter===v?"#fff":"#94a3b8")+';transition:all 0.15s">'+label+'</button>').join("")+'</div></div>' : "")+
+    '</div>';
+
+  // Result count
+  document.getElementById('resultCount').innerHTML =
+    '顯示 <strong style="color:#94a3b8">'+filtered.length+'</strong> 張卡片'+
+    (state.search||state.groupFilter!=="All"||state.teamFilter!=="All"||state.subFilter!=="All"||state.rcFilter!=="All"
+      ? '<button onclick="clearFilters()" style="margin-left:10px;padding:2px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;font-size:11px;cursor:pointer;font-family:inherit">清除篩選</button>' : "");
+}
+
+let _headerBuilt = false;
+function render() {
+  const M = state.isMobile;
+  if (!_headerBuilt) { renderHeader(); _headerBuilt = true; }
+  updateHeaderControls();
+  const filtered = getFiltered();
+  document.getElementById('root').innerHTML =
+    '<div style="max-width:1200px;margin:0 auto;padding:0 '+(M?12:24)+'px 16px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',system-ui,sans-serif">' +
+    (state.view==="stats" ? renderStats(filtered) : renderList(filtered, M)) +
+    '</div>';
+  document.getElementById('modal-root').innerHTML = state.modalPlayer ? renderModal(state.modalPlayer) : "";
 }
 
 function renderList(filtered, M) {

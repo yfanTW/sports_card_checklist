@@ -1227,13 +1227,14 @@ function render() {
           type="text"
           placeholder="搜尋球員、球隊、卡號..."
           value="${state.search.replace(/"/g,'&quot;')}"
-          oninput="setSearch(this.value)"
+          oninput="handleSearchInput(this)"
+          oncompositionend="handleSearchInput(this)"
           style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:14px;outline:none;font-family:inherit"
         />
       </div>
 
       <!-- ROW 2: GROUP FILTERS -->
-      <div style="display:flex;gap:${M?4:6}px;flex-wrap:wrap;margin-bottom:10px">
+      <div id="group-buttons" style="display:flex;gap:${M?4:6}px;flex-wrap:wrap;margin-bottom:10px">
         <button onclick="setGroup('All')" style="padding:${M?"6px 10px":"7px 16px"};border-radius:8px;border:none;font-size:${M?12:13}px;font-weight:700;cursor:pointer;font-family:inherit;background:${state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)"};color:${state.groupFilter==="All"?"#fff":"#94a3b8"};transition:all 0.2s">
           全部 <span style="font-size:11px;opacity:0.7;margin-left:4px">${getBaseFiltered().length}</span>
         </button>
@@ -1245,6 +1246,7 @@ function render() {
       </div>
 
       <!-- ROW 3: SUB-CAT PILLS -->
+      <div id="subcat-pills">
       ${availableSubCats.length>0 ? `
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;padding-left:12px;border-left:3px solid ${GROUP_COLORS[state.groupFilter]||"#6366f1"}60">
         <button onclick="setSubCat('All')" style="padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);font-size:${M?11:12}px;font-weight:600;cursor:pointer;font-family:inherit;background:${state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter==="All"?"#e2e8f0":"#94a3b8"};transition:all 0.2s">全部子類別</button>
@@ -1256,6 +1258,7 @@ function render() {
         }).join("")}
       </div>
       ` : ""}
+      </div>
 
       <!-- ROW 4: DROPDOWNS + RC FILTER -->
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
@@ -1297,13 +1300,15 @@ function render() {
       </div>
 
       <!-- RESULT COUNT -->
-      <div style="font-size:13px;color:#64748b;margin-bottom:12px">
+      <div id="result-count" style="font-size:13px;color:#64748b;margin-bottom:12px">
         顯示 <strong style="color:#94a3b8">${filtered.length}</strong> 張卡片
         ${state.search || state.groupFilter!=="All" || state.teamFilter!=="All" || state.subFilter!=="All" || state.rcFilter!=="All" ? `<button onclick="clearFilters()" style="margin-left:10px;padding:2px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;font-size:11px;cursor:pointer;font-family:inherit">清除篩選</button>` : ""}
       </div>
 
       <!-- LIST / STATS VIEWS -->
+      <div id="dynamic-content">
       ${state.view==="stats" ? renderStats(filtered) : renderList(filtered, M)}
+      </div>
     </div>
   </div>
 
@@ -1311,19 +1316,53 @@ function render() {
   ${state.modalPlayer ? renderModal(state.modalPlayer) : ""}
   `;
 
-  // Remember if search was focused before re-render
-  const searchWasFocused = document.activeElement?.id === 'search-input';
-  const searchSelStart = searchWasFocused ? document.activeElement.selectionStart : null;
-  const searchSelEnd   = searchWasFocused ? document.activeElement.selectionEnd   : null;
+  // ── Smart DOM update: preserve search input to avoid keyboard dismissal ──
+  const root = document.getElementById('root');
+  const prevSearch = document.getElementById('search-input');
+  const searchHadFocus = prevSearch && document.activeElement === prevSearch;
 
-  document.getElementById('root').innerHTML = html;
+  if (searchHadFocus && state.isMobile) {
+    // Mobile + search focused: only update the dynamic content area,
+    // leaving the search input untouched so the keyboard stays open.
+    const dynamicEl = document.getElementById('dynamic-content');
+    if (dynamicEl) {
+      // Extract only the dynamic portion from the new HTML
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      const newDynamic = tmp.querySelector('#dynamic-content');
+      if (newDynamic) {
+        dynamicEl.innerHTML = newDynamic.innerHTML;
+        // Also update the result count inline
+        const oldCount = document.getElementById('result-count');
+        const newCount = tmp.querySelector('#result-count');
+        if (oldCount && newCount) oldCount.innerHTML = newCount.innerHTML;
+        // Update group counts on buttons
+        const oldGroups = document.getElementById('group-buttons');
+        const newGroups = tmp.querySelector('#group-buttons');
+        if (oldGroups && newGroups) oldGroups.innerHTML = newGroups.innerHTML;
+        // Update sub-cat pills
+        const oldSubs = document.getElementById('subcat-pills');
+        const newSubs = tmp.querySelector('#subcat-pills');
+        if (oldSubs && newSubs) oldSubs.innerHTML = newSubs.innerHTML;
+        else if (!newSubs && oldSubs) oldSubs.innerHTML = '';
+        return; // done — keyboard stays open
+      }
+    }
+    // Fallback: if dynamic-content not found, do full replace
+  }
 
-  // Restore focus and cursor position after re-render
-  if (searchWasFocused) {
-    const el = document.getElementById('search-input');
-    if (el) {
-      el.focus();
-      try { el.setSelectionRange(searchSelStart, searchSelEnd); } catch(e) {}
+  // Full DOM replace (desktop, or non-search-focused states)
+  const selStart = prevSearch ? prevSearch.selectionStart : null;
+  const selEnd   = prevSearch ? prevSearch.selectionEnd   : null;
+
+  root.innerHTML = html;
+
+  // Restore focus + cursor on desktop
+  if (searchHadFocus && !state.isMobile) {
+    const newSearch = document.getElementById('search-input');
+    if (newSearch) {
+      newSearch.focus();
+      try { newSearch.setSelectionRange(selStart, selEnd); } catch(e) {}
     }
   }
 }
@@ -1456,6 +1495,42 @@ function renderModal(playerName) {
 }
 
 // ==================== ACTIONS ====================
+// Track IME composing state (Chinese/Japanese input, mobile autocomplete)
+let _isComposing = false;
+let _searchDebounce = null;
+
+function handleSearchInput(el) {
+  // During IME composition (e.g. pinyin), don't trigger render mid-word
+  if (_isComposing) return;
+  const v = el.value;
+  state.search = v;
+  // Debounce on mobile to reduce re-renders (keyboard stays open via partial update)
+  if (state.isMobile) {
+    clearTimeout(_searchDebounce);
+    _searchDebounce = setTimeout(() => render(), 180);
+  } else {
+    render();
+  }
+}
+
+// Listen for compositionstart/end at document level (catches all inputs)
+document.addEventListener('compositionstart', () => { _isComposing = true; });
+document.addEventListener('compositionend',   (e) => {
+  _isComposing = false;
+  // Use the event target directly if it's the search input
+  const el = e.target?.id === 'search-input' ? e.target : document.getElementById('search-input');
+  if (el) {
+    state.search = el.value;
+    // On mobile, debounce the compositionend render too
+    if (state.isMobile) {
+      clearTimeout(_searchDebounce);
+      _searchDebounce = setTimeout(() => render(), 180);
+    } else {
+      render();
+    }
+  }
+});
+
 function setSearch(v) { state.search = v; render(); }
 function setRcFilter(v) { state.rcFilter = v; render(); }
 function toggleStatsShowAll(key) { state.statsShowAll[key] = !state.statsShowAll[key]; render(); }
