@@ -757,6 +757,27 @@ const ALL_DATA = [
   ["PC-?","Roman Anthony","Boston Red Sox","RC"],["PC-?","Jac Caglianone","Kansas City Royals","RC"],
   ["PC-?","Ethan Holliday","Colorado Rockies",null],
   ].map(([n,p,t,sub])=>({n,p,t,group:"Autograph",cat:"Power Chords Auto Parallel",sub:sub||"Auto"})),
+
+  // 2026 BOWMAN ULTIMATE AUTOGRAPH BOOK CARD (Autograph/Multi) — 24 players on one card
+  {n:"UAC-1",p:"Josuar Gonzalez / Edward Florentino / Luis Peña / Zyhir Hope / Carson Benge / JoJo Parker / Steele Hall / Seth Hernandez / Liam Doyle / Kade Anderson / Billy Carlson / George Lombard Jr. / Charlie Condon / JJ Wetherholt / Jesús Made / Leo De Vries / Kevin McGonigle / Walker Jenkins / Travis Bazzana / Bryce Rainer / Ethan Holliday / Eli Willits / Colt Emerson / Konnor Griffin",t:"San Francisco Giants",group:"Autograph",cat:"Ultimate Autograph Book Card",sub:"Auto/Multi",players:[
+    ["Josuar Gonzalez","San Francisco Giants"],["Edward Florentino","Pittsburgh Pirates"],
+    ["Luis Peña","Milwaukee Brewers"],["Zyhir Hope","Los Angeles Dodgers"],
+    ["Carson Benge","New York Mets"],["JoJo Parker","Toronto Blue Jays"],
+    ["Steele Hall","Cincinnati Reds"],["Seth Hernandez","Pittsburgh Pirates"],
+    ["Liam Doyle","St. Louis Cardinals"],["Kade Anderson","Seattle Mariners"],
+    ["Billy Carlson","Chicago White Sox"],["George Lombard Jr.","New York Yankees"],
+    ["Charlie Condon","Colorado Rockies"],["JJ Wetherholt","St. Louis Cardinals"],
+    ["Jesús Made","Milwaukee Brewers"],["Leo De Vries","Athletics"],
+    ["Kevin McGonigle","Detroit Tigers"],["Walker Jenkins","Minnesota Twins"],
+    ["Travis Bazzana","Cleveland Guardians"],["Bryce Rainer","Detroit Tigers"],
+    ["Ethan Holliday","Colorado Rockies"],["Eli Willits","Washington Nationals"],
+    ["Colt Emerson","Seattle Mariners"],["Konnor Griffin","Pittsburgh Pirates"],
+  ]},
+
+  // ALL AMERICA GAME AUTOGRAPHS (Autograph)
+  ...[
+    ["AAG-EH","Ethan Holliday","Colorado Rockies"],
+  ].map(([n,p,t])=>({n,p,t,group:"Autograph",cat:"All America Game Auto",sub:"Auto"})),
 ];
 
 // Build PLAYER_TEAM
@@ -802,7 +823,7 @@ let state={
 window.addEventListener('resize',()=>{state.isMobile=window.innerWidth<640;render();});
 
 // ── Search input with IME guard + mobile debounce ──
-let _isComposing = false, _searchDebounce = null;
+let _isComposing = false, _searchDebounce = null, _searchFocused = false;
 
 function handleSearchInput(el) {
   if (_isComposing) return;
@@ -812,6 +833,9 @@ function handleSearchInput(el) {
     _searchDebounce = setTimeout(() => render(), 180);
   } else render();
 }
+
+function onSearchFocus() { _searchFocused = true; }
+function onSearchBlur()  { _searchFocused = false; }
 
 document.addEventListener('compositionstart', () => { _isComposing = true; });
 document.addEventListener('compositionend', (e) => {
@@ -894,10 +918,20 @@ function teamAbbrChip(team){
   return `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;padding:0 5px;border-radius:5px;background:${color};color:#fff;font-size:10px;font-weight:800;letter-spacing:0.5px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.15);text-shadow:0 1px 1px rgba(0,0,0,0.3)">${abbr}</span>`;
 }
 function cardTeamBadgesHTML(card){
-  const players=getCardPlayers(card),seen=new Set(),badges=[];
+  const players=getCardPlayers(card),teamCount={},teamOrder=[];
   players.forEach(({team,realTeam})=>{
-    if(realTeam){if(!seen.has(realTeam)){seen.add(realTeam);badges.push(`<span style="display:inline-flex;align-items:center;gap:3px">${teamBadgeHTML(realTeam)}</span>`);}}
-    else{if(!seen.has(team)){seen.add(team);badges.push(teamBadgeHTML(team));}}
+    const t=realTeam||team;
+    if(!teamCount[t]){teamCount[t]=0;teamOrder.push({display:t,realTeam:realTeam,team:team});}
+    teamCount[t]++;
+  });
+  const showCount=players.length>2;
+  const badges=teamOrder.map(({display,realTeam,team})=>{
+    const cnt=teamCount[display];
+    const badge=realTeam
+      ? `<span style="display:inline-flex;align-items:center;gap:3px">${teamBadgeHTML(realTeam)}<span style="font-size:10px;color:#64748b;font-weight:600">${team==="National League"?"NL":"AL"}</span></span>`
+      : teamBadgeHTML(display);
+    if(showCount&&cnt>1) return `<span style="display:inline-flex;align-items:center;gap:3px">${badge}<span style="font-size:10px;font-weight:700;color:#94a3b8;background:rgba(255,255,255,0.08);border-radius:4px;padding:1px 5px;min-width:18px;text-align:center">×${cnt}</span></span>`;
+    return badge;
   });
   if(badges.length<=1) return `<span style="display:inline-flex;gap:4px">${badges.join("")}</span>`;
   return `<span style="display:inline-flex;flex-direction:column;gap:3px">${badges.join("")}</span>`;
@@ -1117,7 +1151,7 @@ function render(){
         <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1)">
           ${[["list","清單"],["stats","統計"]].map(([v,label])=>`<button onclick="setView('${v}')" style="padding:${M?"7px 14px":"8px 18px"};border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;background:${state.view===v?"#6366f1":"rgba(255,255,255,0.04)"};color:${state.view===v?"#fff":"#94a3b8"};transition:all 0.2s">${label}</button>`).join("")}
         </div>
-        <input id="search-input" type="text" placeholder="搜尋球員、球隊、卡號..." value="${state.search.replace(/"/g,'&quot;')}" oninput="handleSearchInput(this)" oncompositionend="handleSearchInput(this)" style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:14px;outline:none;font-family:inherit"/>
+        <input id="search-input" type="text" placeholder="搜尋球員、球隊、卡號..." value="${state.search.replace(/"/g,'&quot;')}" oninput="handleSearchInput(this)" oncompositionend="handleSearchInput(this)" onfocus="onSearchFocus()" onblur="onSearchBlur()" style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:16px;outline:none;font-family:inherit"/>
       </div>
       <!-- GROUP BUTTONS -->
       <div id="group-buttons" style="display:flex;gap:${M?4:6}px;flex-wrap:wrap;margin-bottom:10px">
@@ -1162,7 +1196,7 @@ function render(){
   // ── Smart DOM update (Mobile Search Keyboard Fix) ──
   const root = document.getElementById('root');
   const prevSearch = document.getElementById('search-input');
-  const searchHadFocus = prevSearch && document.activeElement === prevSearch;
+  const searchHadFocus = _searchFocused || (prevSearch && document.activeElement === prevSearch);
 
   if (searchHadFocus && state.isMobile) {
     var dynamicEl = document.getElementById('dynamic-content');
@@ -1186,7 +1220,7 @@ function render(){
   var selStart = prevSearch ? prevSearch.selectionStart : null;
   var selEnd   = prevSearch ? prevSearch.selectionEnd   : null;
   root.innerHTML = html;
-  if (searchHadFocus && !state.isMobile) {
+  if (searchHadFocus) {
     var el = document.getElementById('search-input');
     if (el) { el.focus(); try{el.setSelectionRange(selStart,selEnd);}catch(e){} }
   }
