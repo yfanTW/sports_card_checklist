@@ -6,7 +6,7 @@
 <title>2025 Topps Museum Collection Baseball — Complete Checklist</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%); min-height: 100vh; color: #f1f5f9; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%); min-height: 100vh; background-attachment: fixed; color: #f1f5f9; }
   select option { background: #1e293b; color: #f1f5f9; }
   input::placeholder { color: #64748b; }
   input:focus { outline: none; border-color: rgba(99,102,241,0.6) !important; }
@@ -17,7 +17,8 @@
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="app-header"></div>
+<div id="app-content"></div>
 <script>
 
 const ALL_DATA = [
@@ -1492,7 +1493,7 @@ function getCardPlayers(card){
 var HISTORICAL=new Set(["Oakland Athletics","Brooklyn Dodgers","Montréal Expos","California Angels","Florida Marlins","Angels","New York Giants","Milwaukee Braves","Tampa Bay Devil Rays","Cleveland","Royals Stadium"]);
 var FG_LABELS=new Set(["National League","American League"]);
 var MLB_TEAMS=new Set(Object.keys(TEAM_COLORS).filter(function(t){return!HISTORICAL.has(t)&&!FG_LABELS.has(t);}));
-var ALL_TEAMS=[...new Set(ALL_DATA.map(function(d){return d.t;}).filter(function(t){return MLB_TEAMS.has(t);}))].sort();
+var ALL_TEAMS=[...new Set(ALL_DATA.map(function(d){return getFranchise(d.t);}).filter(function(t){return MLB_TEAMS.has(t);}))].sort();
 var ALL_SUBTYPES=[...new Set(ALL_DATA.map(function(d){return d.sub;}).filter(Boolean))].filter(function(s){return s!=="RC"&&s!=="Rookie";}).sort();
 
 // ==================== STATE ====================
@@ -1500,7 +1501,20 @@ var state={search:"",groupFilter:"All",subCatFilter:"All",teamFilter:"All",subFi
 window.addEventListener('resize',function(){state.isMobile=window.innerWidth<640;render();});
 
 // ==================== ACTIONS ====================
-function setSearch(v){state.search=v;render();}
+function setSearch(v){
+  state.search=v;
+  // Only update results area when typing - don't touch the search input
+  var filtered=getFiltered();
+  var M=state.isMobile;
+  var resultsEl=document.getElementById('results-area');
+  if(resultsEl){
+    var rh='<div style="font-size:13px;color:#64748b;margin-bottom:12px">顯示 <strong style="color:#94a3b8">'+filtered.length+'</strong> 張卡片';
+    if(state.search||state.groupFilter!=="All"||state.teamFilter!=="All"||state.subFilter!=="All"||state.rcFilter!=="All")rh+='<button onclick="clearFilters()" style="margin-left:10px;padding:2px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;font-size:11px;cursor:pointer;font-family:inherit">清除篩選</button>';
+    rh+='</div>';
+    rh+=(state.view==="stats"?renderStats(filtered):renderList(filtered,M));
+    resultsEl.innerHTML=rh;
+  }else{render();}
+}
 function setRcFilter(v){state.rcFilter=v;render();}
 function setGroup(g){state.groupFilter=g;state.subCatFilter="All";render();}
 function setSubCat(sc){state.subCatFilter=sc;render();}
@@ -1512,7 +1526,11 @@ function openModal(p){state.modalPlayer=p;render();}
 function closeModal(){state.modalPlayer=null;render();}
 function toggleStatsExpand(key){state.statsExpanded[key]=!state.statsExpanded[key];render();}
 function toggleStatsShowAll(key){state.statsShowAll[key]=!state.statsShowAll[key];render();}
-function clearFilters(){state.search="";state.groupFilter="All";state.subCatFilter="All";state.teamFilter="All";state.subFilter="All";state.rcFilter="All";render();}
+function clearFilters(){
+  state.search="";state.groupFilter="All";state.subCatFilter="All";state.teamFilter="All";state.subFilter="All";state.rcFilter="All";
+  var si=document.getElementById('search-input');if(si)si.value="";
+  render();
+}
 
 // ==================== HELPERS ====================
 function teamBadgeHTML(team){
@@ -1576,7 +1594,7 @@ function renderExpandedCards(cards,accentColor){
 
 function renderStats(data){
   var teamCounts={},playerCounts={},playerTeam={};
-  data.forEach(function(d){var seen=new Set();getCardPlayers(d).forEach(function(pl){var t=pl.realTeam||pl.team;if(!seen.has(t)){seen.add(t);teamCounts[t]=(teamCounts[t]||0)+1;}});});
+  data.forEach(function(d){var seen=new Set();getCardPlayers(d).forEach(function(pl){var t=pl.realTeam||pl.team;var f=getFranchise(t);if(!seen.has(f)){seen.add(f);teamCounts[f]=(teamCounts[f]||0)+1;}});});
   data.forEach(function(d){splitPlayers(d.p).forEach(function(name){playerCounts[name]=(playerCounts[name]||0)+1;if(!playerTeam[name])playerTeam[name]=PLAYER_TEAM[name]||d.t;});});
   var allSortedTeams=Object.entries(teamCounts).sort(function(a,b){return b[1]-a[1];});
   var showAllTeams=!!state.statsShowAll["teams"];var sortedTeams=showAllTeams?allSortedTeams:allSortedTeams.slice(0,15);var maxTeam=allSortedTeams[0]?allSortedTeams[0][1]:1;
@@ -1594,7 +1612,7 @@ function renderStats(data){
   sortedTeams.forEach(function(arr,i){
     var team=arr[0],cnt=arr[1],color=getTeamColor(team),abbr=getTeamAbbr(team),w=Math.round(cnt/maxTeam*100);
     var key='team:'+team,isOpen=!!state.statsExpanded[key];
-    var teamCards=data.filter(function(d){return getCardPlayers(d).some(function(pl){return(pl.realTeam||pl.team)===team;});});
+    var aliases=getTeamAliases(team);var teamCards=data.filter(function(d){return getCardPlayers(d).some(function(pl){var pt=pl.realTeam||pl.team;return aliases.indexOf(pt)>=0;});});
     h+='<div style="margin-bottom:4px"><div onclick="toggleStatsExpand(\''+key.replace(/'/g,"\\'")+'\')" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;background:'+(isOpen?'rgba(99,102,241,0.06)':i%2===0?'#f8fafc':'transparent')+';transition:background 0.15s"><span style="font-size:10px;color:'+(isOpen?'#6366f1':'#94a3b8')+';transition:transform 0.2s;transform:'+(isOpen?'rotate(90deg)':'rotate(0deg)')+';display:inline-block;width:14px;text-align:center;flex-shrink:0">\u25B6</span><span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:20px;padding:0 5px;border-radius:4px;background:'+color+';color:#fff;font-size:10px;font-weight:800;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.15)">'+abbr+'</span><span style="flex:1;font-size:12px;font-weight:500;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+team+'</span><span style="font-size:12px;color:#94a3b8;font-weight:600;min-width:28px;text-align:right;font-family:\'SF Mono\',monospace">'+cnt+'</span></div><div style="margin-left:22px;margin-bottom:2px"><div style="height:6px;border-radius:3px;background:#f1f5f9;overflow:hidden"><div style="height:100%;border-radius:3px;width:'+w+'%;background:'+color+'cc;min-width:2px;transition:width 0.4s ease"></div></div></div>'+(isOpen?renderExpandedCards(teamCards,color):'')+'</div>';
   });
   if(allSortedTeams.length>15)h+='<button onclick="toggleStatsShowAll(\'teams\')" style="margin-top:8px;width:100%;padding:8px 0;border:1px dashed #cbd5e1;border-radius:6px;background:transparent;color:#6366f1;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">'+(showAllTeams?"收起（顯示前 15 支）":"展開全部（共 "+allSortedTeams.length+" 支球隊）")+'</button>';
@@ -1668,14 +1686,20 @@ function renderList(filtered,M){
     }).join("")+'</div>';
 }
 
+
+// ==================== RENDER HEADER (once) ====================
+function renderHeader(){
+  var M=state.isMobile;
+  var h='<div style="padding:'+(M?"16px 12px 12px":"24px 24px 18px")+';border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(30,41,59,0.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100"><div style="max-width:1200px;margin:0 auto"><h1 style="margin:0 0 4px;font-size:'+(M?20:26)+'px;font-family:Georgia,\'Times New Roman\',serif;color:#f1f5f9;letter-spacing:-0.5px">2025 Topps Museum Collection Baseball</h1><p style="margin:0;font-size:'+(M?11:13)+'px;color:#64748b">'+ALL_DATA.length+' 張卡片 · '+GROUP_ORDER.length+' 大類 · '+ALL_TEAMS.length+' 支球隊</p></div></div>';
+  document.getElementById('app-header').innerHTML=h;
+}
+
 function render(){
   var M=state.isMobile;var filtered=getFiltered();var groupCounts=getGroupCounts();var availableSubCats=getAvailableSubCats();
   var px=M?12:24;
   var ss='padding:'+(M?"7px 10px":"8px 12px")+';border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:#1e293b;color:#f1f5f9;font-size:'+(M?12:13)+'px;font-weight:500;outline:none;cursor:pointer;min-width:'+(M?90:120)+'px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 12 12\'%3E%3Cpath fill=\'%2394a3b8\' d=\'M2 4l4 4 4-4\'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px';
   var bs='padding:'+(M?"6px 10px":"8px 14px")+';border:none;border-radius:8px;cursor:pointer;font-size:'+(M?11:13)+'px;font-weight:600;font-family:inherit;transition:all 0.15s';
-  var h='<div style="min-height:100vh;background:linear-gradient(135deg,#1e293b 0%,#334155 50%,#1e293b 100%);font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',system-ui,sans-serif">';
-  h+='<div style="padding:'+(M?"16px 12px 12px":"24px 24px 18px")+';border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(30,41,59,0.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100"><div style="max-width:1200px;margin:0 auto"><h1 style="margin:0 0 4px;font-size:'+(M?20:26)+'px;font-family:Georgia,\'Times New Roman\',serif;color:#f1f5f9;letter-spacing:-0.5px">2025 Topps Museum Collection Baseball</h1><p style="margin:0;font-size:'+(M?11:13)+'px;color:#64748b">'+ALL_DATA.length+' 張卡片 · '+GROUP_ORDER.length+' 大類 · '+ALL_TEAMS.length+' 支球隊</p></div></div>';
-  h+='<div style="max-width:1200px;margin:0 auto;padding:16px '+px+'px">';
+  var h='<div style="max-width:1200px;margin:0 auto;padding:16px '+px+'px">';
   // View toggle + search
   h+='<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap"><div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1)">';
   [["list","清單"],["stats","統計"]].forEach(function(a){h+='<button onclick="setView(\''+a[0]+'\')" style="padding:'+(M?"7px 14px":"8px 18px")+';border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;background:'+(state.view===a[0]?"#6366f1":"rgba(255,255,255,0.04)")+';color:'+(state.view===a[0]?"#fff":"#94a3b8")+';transition:all 0.2s">'+a[1]+'</button>';});
@@ -1704,31 +1728,33 @@ function render(){
   if(M)h+='<div style="display:flex;gap:8px"><select onchange="setSort(this.value)" style="'+ss+';flex:1"><option value="number">按卡號排序</option><option value="player">按球員排序</option><option value="team">按球隊排序</option></select></div>';
   h+='</div>';
   // Result count
+  h+='<div id="results-area">';
   h+='<div style="font-size:13px;color:#64748b;margin-bottom:12px">顯示 <strong style="color:#94a3b8">'+filtered.length+'</strong> 張卡片';
   if(state.search||state.groupFilter!=="All"||state.teamFilter!=="All"||state.subFilter!=="All"||state.rcFilter!=="All")h+='<button onclick="clearFilters()" style="margin-left:10px;padding:2px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;font-size:11px;cursor:pointer;font-family:inherit">清除篩選</button>';
   h+='</div>';
   h+=(state.view==="stats"?renderStats(filtered):renderList(filtered,M));
   h+='</div></div>';
   if(state.modalPlayer)h+=renderModal(state.modalPlayer);
-  // Capture search state before DOM replace
-  var prevSearch=document.getElementById('search-input');
-  var searchHadFocus=document.activeElement&&document.activeElement.id==='search-input';
-  var selStart=prevSearch?prevSearch.selectionStart:null;
-  var selEnd=prevSearch?prevSearch.selectionEnd:null;
 
-  document.getElementById('root').innerHTML=h;
+  // Smart DOM update: preserve search input focus on mobile
+  var searchEl=document.getElementById('search-input');
+  var hadFocus=searchEl&&document.activeElement===searchEl;
+  var cursorPos=searchEl?searchEl.selectionStart:null;
+  var cursorEnd=searchEl?searchEl.selectionEnd:null;
 
-  // Restore search focus + cursor
-  var newSearch=document.getElementById('search-input');
-  if(newSearch&&searchHadFocus){
-    if(!state.isMobile){
-      newSearch.focus();
-      try{newSearch.setSelectionRange(selStart,selEnd);}catch(e){}
-    }else{
-      try{newSearch.setSelectionRange(selStart,selEnd);}catch(e){}
+  document.getElementById('app-content').innerHTML=h;
+
+  if(hadFocus){
+    var newEl=document.getElementById('search-input');
+    if(newEl){
+      newEl.focus();
+      try{newEl.setSelectionRange(cursorPos,cursorEnd);}catch(e){}
     }
   }
 }
+
+renderHeader();
+
 render();
 
 </script>
