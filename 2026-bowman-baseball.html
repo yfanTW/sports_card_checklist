@@ -57,6 +57,19 @@ const TEAM_ABBR = {
 function getTeamColor(t){return TEAM_COLORS[t]||"#6366f1";}
 function getTeamAbbr(t){return TEAM_ABBR[t]||t.slice(0,3).toUpperCase();}
 
+const TEAM_LEGACY = {
+  "Brooklyn Dodgers":"Los Angeles Dodgers",
+  "Tampa Bay Devil Rays":"Tampa Bay Rays",
+  "Oakland Athletics":"Athletics",
+  "Angels":"Los Angeles Angels",
+};
+function getFranchise(t){return TEAM_LEGACY[t]||t;}
+function getTeamAliases(currentTeam){
+  var legacy=[];
+  for(var k in TEAM_LEGACY){if(TEAM_LEGACY[k]===currentTeam)legacy.push(k);}
+  return [currentTeam].concat(legacy);
+}
+
 const ALL_DATA = [
   // BASE CARDS
   ...[ ["1","Aaron Judge","New York Yankees",null],["2","Yoshinobu Yamamoto","Los Angeles Dodgers",null],
@@ -775,7 +788,9 @@ const GROUPS = {};
 GROUP_ORDER.forEach(g=>{GROUPS[g]=[...new Set(ALL_DATA.filter(d=>d.group===g).map(d=>d.cat))];});
 
 const FG_LABELS=new Set(["National League","American League"]);
-const MLB_TEAMS=new Set(Object.keys(TEAM_COLORS).filter(t=>!FG_LABELS.has(t)&&t!=="YOMIURI GIANTS"&&t!=="USA"&&t!=="Japan"&&t!=="Dominican Republic"&&t!=="Tampa Bay Devil Rays"&&t!=="Oakland Athletics"&&t!=="Brooklyn Dodgers"&&t!=="Angels"));
+const HISTORICAL=new Set(["Oakland Athletics","Brooklyn Dodgers","Tampa Bay Devil Rays","Angels"]);
+const NON_TEAM=new Set(["USA","Japan","Dominican Republic"]);
+const MLB_TEAMS=new Set(Object.keys(TEAM_COLORS).filter(t=>!FG_LABELS.has(t)&&!HISTORICAL.has(t)&&!NON_TEAM.has(t)));
 const ALL_TEAMS=[...new Set(ALL_DATA.map(d=>d.t).filter(t=>MLB_TEAMS.has(t)))].sort();
 const ALL_SUBTYPES=[...new Set(ALL_DATA.map(d=>d.sub).filter(Boolean))].filter(s=>s!=="RC"&&s!=="Rookie").sort();
 
@@ -827,7 +842,7 @@ function getFiltered(){
   let items=ALL_DATA;
   if(state.groupFilter!=="All") items=items.filter(d=>d.group===state.groupFilter);
   if(state.subCatFilter!=="All") items=items.filter(d=>d.cat===state.subCatFilter);
-  if(state.teamFilter!=="All") items=items.filter(d=>getCardPlayers(d).some(({team,realTeam})=>team===state.teamFilter||realTeam===state.teamFilter));
+  if(state.teamFilter!=="All"){var _a=getTeamAliases(state.teamFilter);items=items.filter(d=>getCardPlayers(d).some(({team,realTeam})=>_a.indexOf(team)!==-1||(realTeam&&_a.indexOf(realTeam)!==-1)));}
   if(state.subFilter!=="All") items=items.filter(d=>d.sub===state.subFilter);
   if(state.rcFilter==="RC") items=items.filter(d=>splitPlayers(d.p).some(n=>isRC(n)));
   if(state.rcFilter==="Non-RC") items=items.filter(d=>!splitPlayers(d.p).some(n=>isRC(n)));
@@ -845,7 +860,7 @@ function getFiltered(){
 
 function getBaseFiltered(){
   let items=ALL_DATA;
-  if(state.teamFilter!=="All") items=items.filter(d=>getCardPlayers(d).some(({team,realTeam})=>team===state.teamFilter||realTeam===state.teamFilter));
+  if(state.teamFilter!=="All"){var _a=getTeamAliases(state.teamFilter);items=items.filter(d=>getCardPlayers(d).some(({team,realTeam})=>_a.indexOf(team)!==-1||(realTeam&&_a.indexOf(realTeam)!==-1)));}
   if(state.subFilter!=="All") items=items.filter(d=>d.sub===state.subFilter);
   if(state.rcFilter==="RC") items=items.filter(d=>splitPlayers(d.p).some(n=>isRC(n)));
   if(state.rcFilter==="Non-RC") items=items.filter(d=>!splitPlayers(d.p).some(n=>isRC(n)));
@@ -963,7 +978,7 @@ function renderStats(data){
   const teamCounts={},playerCounts={},playerTeamMap={};
   data.forEach(d=>{
     const seen=new Set();
-    getCardPlayers(d).forEach(({team,realTeam})=>{const t=realTeam||team;if(!seen.has(t)){seen.add(t);teamCounts[t]=(teamCounts[t]||0)+1;}});
+    getCardPlayers(d).forEach(({team,realTeam})=>{const t=getFranchise(realTeam||team);if(!seen.has(t)){seen.add(t);teamCounts[t]=(teamCounts[t]||0)+1;}});
   });
   data.forEach(d=>{
     splitPlayers(d.p).forEach(name=>{
@@ -981,10 +996,11 @@ function renderStats(data){
   const maxPlayer=allSortedPlayers[0]?.[1]||1;
   const rcCount=new Set(data.flatMap(d=>splitPlayers(d.p).filter(n=>isRC(n)))).size;
   const autoCount=data.filter(d=>d.sub&&d.sub.startsWith("Auto")).length;
+  const franchiseTeamCount=new Set(data.flatMap(d=>getCardPlayers(d).map(({team,realTeam})=>getFranchise(realTeam||team)))).size;
 
   return `
   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">
-    ${[["總卡數",data.length,"#6366f1"],["RC 新人卡",rcCount,"#f59e0b"],["簽名卡",autoCount,"#10b981"],["球隊數",[...new Set(data.map(d=>d.t))].length,"#f97316"]]
+    ${[["總卡數",data.length,"#6366f1"],["RC 新人卡",rcCount,"#f59e0b"],["簽名卡",autoCount,"#10b981"],["球隊數",franchiseTeamCount,"#f97316"]]
       .map(([label,val,color])=>`<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:8px 14px"><span style="font-size:12px;color:#64748b;white-space:nowrap">${label}</span><span style="font-family:'SF Mono',monospace;font-size:16px;font-weight:700;color:${color}">${val}</span></div>`).join("")}
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px">
@@ -994,7 +1010,7 @@ function renderStats(data){
       ${sortedTeams.map(([team,cnt],i)=>{
         const color=getTeamColor(team),abbr=getTeamAbbr(team),w=Math.round(cnt/maxTeam*100);
         const key='team:'+team,isOpen=!!state.statsExpanded[key];
-        const teamCards=data.filter(d=>getCardPlayers(d).some(({team:t,realTeam})=>(realTeam||t)===team));
+        const _aliases=getTeamAliases(team);const teamCards=data.filter(d=>getCardPlayers(d).some(({team:t,realTeam})=>_aliases.indexOf(getFranchise(realTeam||t))!==-1));
         return `<div style="margin-bottom:4px">
           <div onclick="toggleStatsExpand('${key.replace(/'/g,"\\'")}') " style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;background:${isOpen?"rgba(99,102,241,0.06)":i%2===0?"#f8fafc":"transparent"};transition:background 0.15s">
             <span style="font-size:10px;color:${isOpen?"#6366f1":"#94a3b8"};transition:transform 0.2s;transform:${isOpen?"rotate(90deg)":"rotate(0deg)"};display:inline-block;width:14px;text-align:center;flex-shrink:0">▶</span>
