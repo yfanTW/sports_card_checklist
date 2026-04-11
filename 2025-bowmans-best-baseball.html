@@ -1088,22 +1088,23 @@ function renderStats(data) {
   const sortedTeams = showAllTeams ? allSortedTeams : allSortedTeams.slice(0,15);
   const maxTeam = allSortedTeams[0]?.[1] || 1;
 
-  // player counts — split multi-player cards
-  const playerCounts = {};
-  const playerTeam = {};
+  // player counts — split multi-player cards, keyed by "player|||team"
+  // A player on different teams counts separately.
+  const playerTeamCounts = {};
   data.forEach(d => {
-    const names = splitPlayers(d.p);
-    names.forEach(name => {
-      playerCounts[name] = (playerCounts[name]||0) + 1;
-      if (names.length === 1 || !playerTeam[name]) {
-        playerTeam[name] = PLAYER_TEAM[name] || d.t;
-      }
+    const players = getCardPlayers(d);
+    players.forEach(({name, team, realTeam}) => {
+      const t = realTeam || team;
+      const key = name + '|||' + t;
+      playerTeamCounts[key] = (playerTeamCounts[key]||0) + 1;
     });
   });
-  const allSortedPlayers = Object.entries(playerCounts).sort((a,b)=>b[1]-a[1]);
+  const allSortedPlayers = Object.entries(playerTeamCounts)
+    .map(([key,cnt]) => { const [name,team] = key.split('|||'); return [name, team, cnt]; })
+    .sort((a,b)=>b[2]-a[2]);
   const showAllPlayers = !!state.statsShowAll["players"];
   const sortedPlayers = showAllPlayers ? allSortedPlayers : allSortedPlayers.slice(0,15);
-  const maxPlayer = allSortedPlayers[0]?.[1] || 1;
+  const maxPlayer = allSortedPlayers[0]?.[2] || 1;
 
   // Count distinct RC players appearing in data (Base Set definition)
   const rcCount = new Set(
@@ -1162,18 +1163,22 @@ function renderStats(data) {
     <!-- Player Ranking -->
     <div style="background:#fff;border-radius:10px;padding:14px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:14px">球員出現次數 Top 15</div>
-      ${sortedPlayers.map(([player,cnt],i)=>{
-        const color = getTeamColor(playerTeam[player]);
-        const abbr  = getTeamAbbr(playerTeam[player]);
+      ${sortedPlayers.map(([player,pTeam,cnt],i)=>{
+        const color = getTeamColor(pTeam);
+        const abbr  = getTeamAbbr(pTeam);
         const w = Math.round(cnt/maxPlayer*100);
-        const key = 'player:' + player;
+        const key = 'player:' + player + ':' + pTeam;
         const isOpen = !!state.statsExpanded[key];
-        const playerCards = data.filter(d => splitPlayers(d.p).includes(player));
+        const playerCards = data.filter(d =>
+          getCardPlayers(d).some(({name, team, realTeam}) =>
+            name === player && (realTeam || team) === pTeam
+          )
+        );
         return `<div style="margin-bottom:4px">
           <div onclick="toggleStatsExpand('${key.replace(/'/g,"\'")}') " style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;background:${isOpen?'rgba(99,102,241,0.06)':i%2===0?'#f8fafc':'transparent'};transition:background 0.15s">
             <span style="font-size:10px;color:${isOpen?'#6366f1':'#94a3b8'};transition:transform 0.2s;transform:${isOpen?'rotate(90deg)':'rotate(0deg)'};display:inline-block;width:14px;text-align:center;flex-shrink:0">▶</span>
             <span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:20px;padding:0 5px;border-radius:4px;background:${color};color:#fff;font-size:10px;font-weight:800;letter-spacing:0.5px;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.15)">${abbr}</span>
-            <span style="flex:1;font-size:12px;font-weight:500;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${player}</span>
+            <span onclick="event.stopPropagation();openModal('${player.replace(/'/g,"\\'")}')" style="flex:1;font-size:12px;font-weight:500;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;border-bottom:1px dashed #cbd5e1;display:inline-block;width:fit-content">${player}</span>
             <span style="font-size:12px;color:#94a3b8;font-weight:600;min-width:28px;text-align:right;font-family:'SF Mono','Cascadia Code',monospace">${cnt}</span>
           </div>
           <div style="margin-left:22px;margin-bottom:2px">
