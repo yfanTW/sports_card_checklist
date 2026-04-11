@@ -910,21 +910,49 @@ window.addEventListener('resize', () => {
 });
 
 // ── Filtering ────────────────────────────────────────────────────────────────
+
+// Applies all active filters EXCEPT group/subCat — used for dynamic counts on group buttons & pills
+function getBaseFiltered() {
+  let items = ALL_DATA;
+  if (state.teamFilter !== "All") {
+    const aliases = getTeamAliases(state.teamFilter);
+    items = items.filter(d =>
+      getCardPlayers(d).some(({team, realTeam}) => aliases.includes(realTeam || team))
+    );
+  }
+  if (state.subFilter !== "All") items = items.filter(d => d.sub === state.subFilter);
+  if (state.rcFilter === "RC")     items = items.filter(d => splitPlayers(d.p).some(n => isRC(n)));
+  if (state.rcFilter === "Non-RC") items = items.filter(d => !splitPlayers(d.p).some(n => isRC(n)));
+  if (state.search.trim()) {
+    const q = state.search.toLowerCase();
+    items = items.filter(d =>
+      d.p.toLowerCase().includes(q) ||
+      getCardPlayers(d).some(({team}) => team.toLowerCase().includes(q)) ||
+      String(d.n).toLowerCase().includes(q)
+    );
+  }
+  return items;
+}
+
 function getGroupCounts() {
+  const base = getBaseFiltered();
   const counts = {};
   GROUP_ORDER.forEach(g => {
-    counts[g] = ALL_DATA.filter(d => d.group === g).length;
+    counts[g] = base.filter(d => d.group === g).length;
   });
   return counts;
 }
 
 function getAvailableSubCats() {
   if (state.groupFilter === "All") return [];
+  const base = getBaseFiltered();
   const cats = GROUPS[state.groupFilter] || [];
-  return cats.map(cat => ({
-    cat,
-    count: ALL_DATA.filter(d => d.group === state.groupFilter && d.cat === cat).length
-  }));
+  return cats
+    .map(cat => ({
+      cat,
+      count: base.filter(d => d.group === state.groupFilter && d.cat === cat).length
+    }))
+  ;
 }
 
 function getFiltered() {
@@ -1306,6 +1334,7 @@ function clearFilters() {
 function render() {
   const M = state.isMobile;
   const filtered = getFiltered();
+  const baseFiltered = getBaseFiltered();
   const groupCounts = getGroupCounts();
   const availableSubCats = getAvailableSubCats();
   const px = M ? 12 : 24;
@@ -1349,7 +1378,7 @@ function render() {
 
       <!-- ROW 2: GROUP FILTER BUTTONS -->
       <div style="display:flex;gap:${M?4:6}px;flex-wrap:wrap;margin-bottom:10px">
-        <button onclick="setGroup('All')" style="padding:${M?"6px 10px":"7px 14px"};border-radius:8px;border:none;cursor:pointer;font-size:${M?12:13}px;font-weight:600;font-family:inherit;background:${state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)"};color:${state.groupFilter==="All"?"#fff":"#94a3b8"};transition:all 0.2s">全部 ${ALL_DATA.length}</button>
+        <button onclick="setGroup('All')" style="padding:${M?"6px 10px":"7px 14px"};border-radius:8px;border:none;cursor:pointer;font-size:${M?12:13}px;font-weight:600;font-family:inherit;background:${state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)"};color:${state.groupFilter==="All"?"#fff":"#94a3b8"};transition:all 0.2s">全部 ${baseFiltered.length}</button>
         ${GROUP_ORDER.map(g => {
           const col = GROUP_COLORS[g];
           return `<button onclick="setGroup('${g}')" style="padding:${M?"6px 10px":"7px 14px"};border-radius:8px;border:none;cursor:pointer;font-size:${M?12:13}px;font-weight:600;font-family:inherit;background:${state.groupFilter===g?col:"rgba(255,255,255,0.06)"};color:${state.groupFilter===g?"#fff":"#94a3b8"};transition:all 0.2s">${g} ${groupCounts[g]||0}</button>`;

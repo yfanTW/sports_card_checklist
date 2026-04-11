@@ -790,7 +790,8 @@ const GROUP_COLORS={"Base":"#6366f1","Insert":"#f59e0b","Autograph":"#10b981"};
 // ============================================================
 let state={
   search:"",
-  composing:false,  // NEW: track IME composition state
+  searchInput:"",   // live IME buffer — shown in input value, NOT used for filtering directly
+  composing:false,
   groupFilter:"All",
   subCatFilter:"All",
   teamFilter:"All",
@@ -845,6 +846,28 @@ function catBadgeHTML(cat,group){
 // ============================================================
 // FILTERING
 // ============================================================
+
+// Returns filtered data applying all filters EXCEPT the ones listed in `except`
+function getFilteredExcept(except=[]){
+  let items=ALL_DATA;
+  if(!except.includes('group') && state.groupFilter!=="All") items=items.filter(d=>d.group===state.groupFilter);
+  if(!except.includes('subCat') && state.subCatFilter!=="All") items=items.filter(d=>d.cat===state.subCatFilter);
+  if(!except.includes('team') && state.teamFilter!=="All") items=items.filter(d=>getCardPlayers(d).some(({team})=>team===state.teamFilter));
+  if(!except.includes('sub') && state.subFilter!=="All") items=items.filter(d=>d.sub===state.subFilter);
+  if(!except.includes('rc')){
+    if(state.rcFilter==="RC") items=items.filter(d=>splitPlayers(d.p).some(n=>isRC(n)));
+    if(state.rcFilter==="Non-RC") items=items.filter(d=>!splitPlayers(d.p).some(n=>isRC(n)));
+  }
+  if(!except.includes('search') && state.search.trim()){
+    const q=state.search.toLowerCase();
+    items=items.filter(d=>
+      d.p.toLowerCase().includes(q)||
+      getCardPlayers(d).some(({team})=>team.toLowerCase().includes(q))||
+      String(d.n).toLowerCase().includes(q)
+    );
+  }
+  return items;
+}
 function getFiltered(){
   let items=ALL_DATA;
   if(state.groupFilter!=="All") items=items.filter(d=>d.group===state.groupFilter);
@@ -1015,207 +1038,209 @@ function renderModal(playerName){
 // MAIN RENDER
 // ============================================================
 function render(){
+  const M=state.isMobile;
   const filtered=getFiltered();
-  const isMobile=state.isMobile;
+  const px=M?12:24;
 
-  const ss=`padding:${isMobile?"7px 10px":"8px 12px"};border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:#1e293b;color:#f1f5f9;font-size:${isMobile?12:13}px;font-weight:500;outline:none;cursor:pointer;min-width:${isMobile?90:120}px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M2 4l4 4 4-4'/%3E%3C%2Fsvg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px`;
+  const ss=`padding:${M?"7px 10px":"8px 12px"};border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:#1e293b;color:#f1f5f9;font-size:${M?16:13}px;font-weight:500;outline:none;cursor:pointer;min-width:${M?90:120}px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M2 4l4 4 4-4'/%3E%3C%2Fsvg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px`;
 
-  // Header
-  let html=`
-  <div style="padding:${isMobile?"16px 12px 12px":"24px 24px 18px"};border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(30,41,59,0.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100">
-    <div style="max-width:1200px;margin:0 auto">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:${isMobile?10:14}px;gap:10px">
-        <div>
-          <h1 style="margin:0 0 4px;font-size:${isMobile?20:26}px;font-family:Georgia,'Times New Roman',serif;color:#f1f5f9;letter-spacing:-0.5px">2025 Topps Cosmic Chrome Baseball</h1>
-          <p style="margin:0;font-size:${isMobile?11:13}px;color:#64748b">${ALL_DATA.length} 張卡片 · 3 大類 · ${ALL_TEAMS.length} 支球隊</p>
-        </div>
+  // Dynamic group counts — apply all filters except group itself
+  const baseForGroups=getFilteredExcept(['group','subCat']);
+  const groupCounts={};
+  GROUP_ORDER.forEach(g=>{groupCounts[g]=baseForGroups.filter(d=>d.group===g).length;});
+  const totalCount=baseForGroups.length;
+
+  // Dynamic sub-cat counts — apply all filters except subCat itself
+  const baseForSubCats=getFilteredExcept(['subCat']);
+  const availableSubCats = state.groupFilter==="All" ? [] :
+    (GROUPS[state.groupFilter]||[]).map(cat=>({cat,count:baseForSubCats.filter(d=>d.cat===cat).length}));
+
+  const html=`
+  <div style="min-height:100vh">
+
+    <!-- STICKY HEADER: title only -->
+    <div style="padding:${M?"14px 12px 10px":"20px 24px 16px"};border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(30,41,59,0.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100">
+      <div style="max-width:1200px;margin:0 auto">
+        <h1 style="margin:0 0 3px;font-size:${M?18:26}px;font-family:Georgia,'Times New Roman',serif;color:#f1f5f9;letter-spacing:-0.5px">2025 Topps Cosmic Chrome Baseball</h1>
+        <p style="margin:0;font-size:${M?11:13}px;color:#64748b">${ALL_DATA.length} 張卡片 · 3 大類 · ${ALL_TEAMS.length} 支球隊</p>
+      </div>
+    </div>
+
+    <!-- CONTENT AREA -->
+    <div style="max-width:1200px;margin:0 auto;padding:16px ${px}px">
+
+      <!-- ROW 1: VIEW TOGGLE + SEARCH -->
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
         <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">
-          ${[["list","清單"],["stats","統計"]].map(([v,label])=>`
-            <button onclick="setView('${v}')" style="padding:${isMobile?"7px 14px":"8px 18px"};border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;background:${state.view===v?"#6366f1":"rgba(255,255,255,0.04)"};color:${state.view===v?"#fff":"#94a3b8"};transition:all 0.2s">${label}</button>`).join("")}
+          ${[["list","清單"],["stats","統計"]].map(([v,label])=>
+            `<button onclick="setView('${v}')" style="padding:${M?"7px 14px":"8px 18px"};border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;background:${state.view===v?"#6366f1":"rgba(255,255,255,0.04)"};color:${state.view===v?"#fff":"#94a3b8"};transition:all 0.2s">${label}</button>`
+          ).join("")}
         </div>
+        <input
+          id="search-input"
+          type="search"
+          inputmode="text"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="搜尋球員、球隊、卡號..."
+          value="${(state.searchInput||"").replace(/&/g,'&amp;').replace(/"/g,'&quot;')}"
+          style="flex:1;min-width:${M?120:200}px;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:${M?16:14}px;outline:none;font-family:inherit;-webkit-appearance:none"/>
       </div>
 
-      <!-- Search + controls row -->
-      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-        <div style="position:relative;flex:1;min-width:${isMobile?120:200}px">
-          <input
-            id="search-input"
-            type="search"
-            inputmode="search"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            spellcheck="false"
-            placeholder="搜尋球員、球隊、卡號…"
-            value="${state.search.replace(/"/g,'&quot;')}"
-            style="width:100%;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:${isMobile?16:14}px;outline:none;font-family:inherit"
-          >
-          ${state.search?`<button onclick="clearSearch()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748b;font-size:18px;line-height:1;padding:0">×</button>`:""}
+      <!-- ROW 2: GROUP FILTER BUTTONS -->
+      <div style="display:flex;gap:${M?4:6}px;flex-wrap:wrap;margin-bottom:10px">
+        <button onclick="setGroup('All')" style="padding:${M?"6px 10px":"7px 14px"};border-radius:8px;border:none;cursor:pointer;font-size:${M?12:13}px;font-weight:600;font-family:inherit;background:${state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)"};color:${state.groupFilter==="All"?"#fff":"#94a3b8"};transition:all 0.2s">全部 ${totalCount}</button>
+        ${GROUP_ORDER.map(g=>{
+          const col=GROUP_COLORS[g];
+          return `<button onclick="setGroup('${g}')" style="padding:${M?"6px 10px":"7px 14px"};border-radius:8px;border:none;cursor:pointer;font-size:${M?12:13}px;font-weight:600;font-family:inherit;background:${state.groupFilter===g?col:"rgba(255,255,255,0.06)"};color:${state.groupFilter===g?"#fff":"#94a3b8"};transition:all 0.2s">${g} ${groupCounts[g]||0}</button>`;
+        }).join("")}
+      </div>
+
+      <!-- ROW 3: SUB-CAT PILLS (conditional) -->
+      ${availableSubCats.length>0 ? `
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;padding-left:12px;border-left:3px solid ${GROUP_COLORS[state.groupFilter]||"#6366f1"}60">
+        <button onclick="setSubCat('All')" style="padding:4px 10px;border-radius:6px;border:1px solid ${state.subCatFilter==="All"?GROUP_COLORS[state.groupFilter]||"#6366f1":"rgba(255,255,255,0.1)"};background:${state.subCatFilter==="All"?(GROUP_COLORS[state.groupFilter]||"#6366f1")+"18":"transparent"};color:${state.subCatFilter==="All"?GROUP_COLORS[state.groupFilter]||"#6366f1":"#64748b"};font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">全部子類別</button>
+        ${availableSubCats.map(({cat,count})=>
+          `<button onclick="setSubCat('${cat.replace(/'/g,"\\'")}') " style="padding:4px 10px;border-radius:6px;border:1px solid ${state.subCatFilter===cat?GROUP_COLORS[state.groupFilter]||"#6366f1":"rgba(255,255,255,0.1)"};background:${state.subCatFilter===cat?(GROUP_COLORS[state.groupFilter]||"#6366f1")+"18":"transparent"};color:${state.subCatFilter===cat?GROUP_COLORS[state.groupFilter]||"#6366f1":"#64748b"};font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">${cat} (${count})</button>`
+        ).join("")}
+      </div>` : ""}
+
+      <!-- ROW 4: DROPDOWNS + RC TOGGLE -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select onchange="setTeam(this.value)" style="${ss};flex:1;min-width:${M?100:120}px">
+            <option value="All">全部球隊</option>
+            ${ALL_TEAMS.map(t=>`<option value="${t}" ${state.teamFilter===t?"selected":""}>${t}</option>`).join("")}
+          </select>
+          <select onchange="setSub(this.value)" style="${ss};flex:1;min-width:${M?100:120}px">
+            <option value="All">全部類型</option>
+            ${ALL_SUBTYPES.map(s=>`<option value="${s}" ${state.subFilter===s?"selected":""}>${s}</option>`).join("")}
+          </select>
+          ${!M?`<select onchange="setSort(this.value)" style="${ss}">
+            <option value="number" ${state.sortBy==="number"?"selected":""}>按卡號排序</option>
+            <option value="player" ${state.sortBy==="player"?"selected":""}>按球員排序</option>
+            <option value="team" ${state.sortBy==="team"?"selected":""}>按球隊排序</option>
+          </select>`:""}
+          <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">
+            ${[["All","全部"],["RC","RC"],["Non-RC","非RC"]].map(([v,label])=>
+              `<button onclick="setRcFilter('${v}')" style="padding:${M?"6px 10px":"7px 14px"};border:none;cursor:pointer;font-size:${M?11:12}px;font-weight:600;font-family:inherit;background:${state.rcFilter===v?(v==="RC"?"#f59e0b":v==="Non-RC"?"#6366f1":"#475569"):"#1e293b"};color:${state.rcFilter===v?"#fff":"#94a3b8"};transition:all 0.15s">${label}</button>`
+            ).join("")}
+          </div>
         </div>
-        <select onchange="setTeam(this.value)" style="${ss}">
-          <option value="All">全部球隊</option>
-          ${ALL_TEAMS.map(t=>`<option value="${t}" ${state.teamFilter===t?"selected":""}>${t}</option>`).join("")}
-        </select>
-        <select onchange="setSub(this.value)" style="${ss}">
-          <option value="All">全部類型</option>
-          ${ALL_SUBTYPES.map(s=>`<option value="${s}" ${state.subFilter===s?"selected":""}>${s}</option>`).join("")}
-        </select>
-        <select onchange="setSort(this.value)" style="${ss}">
-          <option value="number" ${state.sortBy==="number"?"selected":""}>卡號排序</option>
-          <option value="player" ${state.sortBy==="player"?"selected":""}>球員排序</option>
-          <option value="team" ${state.sortBy==="team"?"selected":""}>球隊排序</option>
-        </select>
-      </div>`;
+        ${M?`<div style="display:flex;gap:8px">
+          <select onchange="setSort(this.value)" style="${ss};flex:1">
+            <option value="number" ${state.sortBy==="number"?"selected":""}>按卡號排序</option>
+            <option value="player" ${state.sortBy==="player"?"selected":""}>按球員排序</option>
+            <option value="team" ${state.sortBy==="team"?"selected":""}>按球隊排序</option>
+          </select>
+        </div>`:""}
+      </div>
 
-  // Group buttons
-  const groupCounts={};
-  GROUP_ORDER.forEach(g=>{groupCounts[g]=ALL_DATA.filter(d=>d.group===g).length;});
-  html+=`<div id="group-buttons" style="display:flex;gap:${isMobile?4:6}px;flex-wrap:wrap;margin-bottom:10px">
-    <button onclick="setGroup('All')" style="padding:${isMobile?"6px 10px":"7px 16px"};border-radius:8px;border:none;font-size:${isMobile?12:13}px;font-weight:700;cursor:pointer;font-family:inherit;background:${state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)"};color:${state.groupFilter==="All"?"#fff":"#94a3b8"};transition:all 0.2s">
-      全部 ${!isMobile?`<span style="font-size:11px;opacity:0.7;margin-left:4px">${ALL_DATA.length}</span>`:""}
-    </button>
-    ${GROUP_ORDER.map(g=>`
-      <button onclick="setGroup('${g}')" style="padding:${isMobile?"6px 10px":"7px 16px"};border-radius:8px;border:none;font-size:${isMobile?12:13}px;font-weight:700;cursor:pointer;font-family:inherit;background:${state.groupFilter===g?GROUP_COLORS[g]:"rgba(255,255,255,0.06)"};color:${state.groupFilter===g?"#fff":"#cbd5e1"};transition:all 0.2s;${state.groupFilter!==g?"border-bottom:2px solid "+GROUP_COLORS[g]+"40":""}">
-        ${g} ${!isMobile?`<span style="font-size:11px;opacity:0.7;margin-left:4px">${groupCounts[g]}</span>`:""}
-      </button>`).join("")}
-    <span style="margin-left:auto;font-size:12px;color:#64748b;align-self:center">${filtered.length} / ${ALL_DATA.length} 張
-      ${(state.search||state.groupFilter!=="All"||state.teamFilter!=="All"||state.subFilter!=="All"||state.rcFilter!=="All")?`<button onclick="clearFilters()" style="margin-left:8px;padding:3px 10px;border-radius:6px;border:1px solid rgba(255,100,100,0.3);background:rgba(255,100,100,0.1);color:#f87171;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">清除</button>`:""}
-    </span>
-  </div>`;
+      <!-- RESULT COUNT -->
+      <div style="font-size:13px;color:#64748b;margin-bottom:12px">
+        顯示 <strong style="color:#94a3b8">${filtered.length}</strong> 張卡片
+        ${state.search||state.groupFilter!=="All"||state.teamFilter!=="All"||state.subFilter!=="All"||state.rcFilter!=="All"
+          ?`<button onclick="clearFilters()" style="margin-left:10px;padding:2px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;font-size:11px;cursor:pointer;font-family:inherit">清除篩選</button>`:""}
+      </div>
 
-  // Sub-cat pills (shown when a group is selected)
-  if(state.groupFilter!=="All"){
-    const cats=GROUPS[state.groupFilter]||[];
-    const gcol=GROUP_COLORS[state.groupFilter]||"#6366f1";
-    html+=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;padding-left:12px;border-left:3px solid ${gcol}60">
-      <button onclick="setSubCat('All')" style="padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);font-size:${isMobile?11:12}px;font-weight:600;cursor:pointer;font-family:inherit;background:${state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter==="All"?"#e2e8f0":"#94a3b8"};transition:all 0.2s">全部子類別</button>
-      ${cats.map(c=>{
-        const active=state.subCatFilter===c;
-        const cnt=ALL_DATA.filter(d=>d.cat===c).length;
-        return `<button onclick="setSubCat('${c.replace(/'/g,"\\'")}') " style="padding:4px 12px;border-radius:999px;border:1px solid ${active?gcol+"60":"rgba(255,255,255,0.08)"};font-size:${isMobile?11:12}px;font-weight:600;cursor:pointer;font-family:inherit;background:${active?gcol+"22":"transparent"};color:${active?gcol:"#94a3b8"};transition:all 0.2s">${c} <span style="opacity:0.7;font-size:10px">${cnt}</span></button>`;
-      }).join("")}
-    </div>`;
-  }
+      <!-- LIST / STATS -->
+      <div id="list-container">
+        ${state.view==="stats" ? renderStats() : renderList(filtered,M)}
+      </div>
 
-  // RC filter row
-  html+=`<div style="display:flex;gap:${isMobile?3:4}px;flex-wrap:wrap;margin-bottom:6px">
-    ${["All","RC","Non-RC"].map(v=>`<button onclick="setRcFilter('${v}')" style="padding:${isMobile?"5px 10px":"6px 14px"};border-radius:8px;border:1px solid ${state.rcFilter===v?"#f59e0b":"rgba(255,255,255,0.1)"};background:${state.rcFilter===v?"rgba(245,158,11,0.15)":"transparent"};color:${state.rcFilter===v?"#fcd34d":"#94a3b8"};font-size:${isMobile?11:12}px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.2s">${v==="All"?"全部 RC 狀態":v==="Non-RC"?"非 RC":"RC 新人卡"}</button>`).join("")}
-  </div>`;
-
-  html+=`</div></div>`;
-
-  // Main content
-  html+=`<div style="max-width:1200px;margin:0 auto;padding:${isMobile?'12px 10px':'20px'}">`;
-
-  if(state.view==="stats"){
-    html+=renderStats();
-  } else {
-    if(!filtered.length){
-      html+=`<div style="text-align:center;padding:60px 20px;color:#64748b">
-        <div style="font-size:48px;margin-bottom:12px">🔭</div>
-        <div style="font-size:16px;font-weight:600;margin-bottom:8px">找不到相符的卡片</div>
-        <div style="font-size:13px">試試不同的搜尋條件</div>
-      </div>`;
-    } else if(isMobile){
-      // Mobile: stacked card layout
-      html+=`<div style="display:flex;flex-direction:column;gap:6px">`;
-      filtered.forEach((card,i)=>{
-        const gcolor=GROUP_COLORS[card.group]||"#6366f1";
-        const players=getCardPlayers(card);
-        const isCollected=!!state.collected[card.n+':'+card.cat];
-        html+=`<div onclick="openModal('${players[0].name.replace(/'/g,"\\'")}') " style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:${i%2===0?'rgba(255,255,255,0.04)':'transparent'};border:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background 0.15s" onmouseenter="this.style.background='rgba(99,102,241,0.08)'" onmouseleave="this.style.background='${i%2===0?'rgba(255,255,255,0.04)':'transparent'}'">
-          <span style="font-family:'SF Mono','Cascadia Code',monospace;color:#6366f1;font-size:11px;min-width:58px;flex-shrink:0">${card.n}</span>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:600;color:#f1f5f9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${card.p}</div>
-            <div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;align-items:center">
-              ${cardTeamBadgesHTML(card)}
-              ${card.sub&&card.sub!=="RC"?badgeHTML(card.sub):""}
-              ${isRC(players[0].name)?badgeHTML("RC"):""}
-            </div>
-          </div>
-          <span style="width:6px;height:6px;border-radius:50%;background:${gcolor};flex-shrink:0;opacity:0.8"></span>
-        </div>`;
-      });
-      html+=`</div>`;
-    } else {
-      // Desktop: table layout
-      html+=`<div style="background:rgba(255,255,255,0.02);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06)">
-        <div style="display:grid;grid-template-columns:90px 1fr 200px 120px 100px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.08);font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">
-          <span>卡號</span><span>球員</span><span>球隊</span><span>分類</span><span>類型</span>
-        </div>`;
-      filtered.forEach((card,i)=>{
-        const gcolor=GROUP_COLORS[card.group]||"#6366f1";
-        const players=getCardPlayers(card);
-        html+=`<div onclick="openModal('${players[0].name.replace(/'/g,"\\'")}') " style="display:grid;grid-template-columns:90px 1fr 200px 120px 100px;padding:9px 16px;border-bottom:1px solid rgba(255,255,255,0.04);background:${i%2===0?'rgba(255,255,255,0.02)':'transparent'};cursor:pointer;transition:background 0.12s;align-items:center" onmouseenter="this.style.background='rgba(99,102,241,0.06)'" onmouseleave="this.style.background='${i%2===0?'rgba(255,255,255,0.02)':'transparent'}'">
-          <span style="font-family:'SF Mono','Cascadia Code',monospace;color:#6366f1;font-size:12px">${card.n}</span>
-          <div style="display:flex;align-items:center;gap:6px;min-width:0">
-            <span style="font-size:13px;font-weight:500;color:#f1f5f9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${card.p}</span>
-            ${isRC(players[0].name)?badgeHTML("RC"):""}
-          </div>
-          <div style="overflow:hidden">${cardTeamBadgesHTML(card)}</div>
-          <div>${catBadgeHTML(card.cat,card.group)}</div>
-          <div>${card.sub&&card.sub!=="RC"?badgeHTML(card.sub):""}</div>
-        </div>`;
-      });
-      html+=`</div>`;
-    }
-  }
-
-  html+=`</div>`;
-
-  // Modal
-  if(state.modalPlayer) html+=renderModal(state.modalPlayer);
+    </div>
+  </div>
+  ${state.modalPlayer?renderModal(state.modalPlayer):""}
+  `;
 
   document.getElementById('root').innerHTML=html;
-
-  // CRITICAL: attach IME-safe search event listeners
-  attachSearchListeners();
+  initSearchInput();
 }
 
 // ============================================================
-// IME-SAFE SEARCH (fixes 注音/Chinese input on mobile)
+// LIST RENDERER (extracted for clarity)
 // ============================================================
-function attachSearchListeners(){
+function renderList(filtered,M){
+  if(!filtered.length) return `<div style="padding:60px 20px;text-align:center;color:#64748b;font-size:15px">沒有找到符合條件的卡片</div>`;
+
+  if(M){
+    // Mobile: stacked card layout
+    return `<div style="display:flex;flex-direction:column;gap:2px">`+
+      filtered.map((card,idx)=>{
+        const gcolor=GROUP_COLORS[card.group]||"#6366f1";
+        const players=getCardPlayers(card);
+        return `<div style="padding:12px 14px;border-radius:10px;background:${idx%2===0?"rgba(255,255,255,0.04)":"transparent"}">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span style="font-family:'SF Mono',monospace;font-size:11px;color:#94a3b8;min-width:44px;flex-shrink:0">${card.n}</span>
+            <span onclick="openModal('${players[0].name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}') " style="color:#e2e8f0;font-weight:600;cursor:pointer;font-size:14px;border-bottom:1px dashed rgba(255,255,255,0.15);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${card.p}</span>
+            <span style="width:7px;height:7px;border-radius:50%;background:${gcolor};flex-shrink:0;opacity:0.8"></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            ${catBadgeHTML(card.cat,card.group)}
+            ${cardTeamBadgesHTML(card)}
+            ${card.sub&&card.sub!=="RC"?badgeHTML(card.sub):""}
+            ${isRC(players[0].name)?badgeHTML("RC"):""}
+          </div>
+        </div>`;
+      }).join("")+`</div>`;
+  }
+
+  // Desktop: table layout
+  return `<div style="display:flex;flex-direction:column;gap:2px">
+    <div style="display:grid;grid-template-columns:90px minmax(140px,1fr) minmax(160px,230px) 60px minmax(120px,1fr);gap:8px;padding:10px 16px;background:rgba(255,255,255,0.03);border-radius:10px 10px 0 0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b">
+      <span>卡號</span><span>球員</span><span>球隊</span><span>RC</span><span>分類 / 類型</span>
+    </div>`+
+    filtered.map((card,idx)=>{
+      const players=getCardPlayers(card);
+      const cardIsRC=isRC(players[0].name);
+      return `<div style="display:grid;grid-template-columns:90px minmax(140px,1fr) minmax(160px,230px) 60px minmax(120px,1fr);gap:8px;padding:10px 16px;align-items:flex-start;background:${idx%2===0?"rgba(255,255,255,0.04)":"transparent"};transition:all 0.15s;font-size:14px" onmouseover="this.style.background='rgba(99,102,241,0.06)'" onmouseout="this.style.background='${idx%2===0?"rgba(255,255,255,0.04)":"transparent"}'">
+        <span style="font-family:'SF Mono',monospace;color:#6366f1;font-size:12px;padding-top:2px">${card.n}</span>
+        <span onclick="openModal('${players[0].name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}') " style="color:#e2e8f0;font-weight:500;cursor:pointer;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-bottom:1px dashed rgba(255,255,255,0.1);display:inline-block;max-width:100%">${card.p}</span>
+        <span style="font-size:13px;display:flex;align-items:flex-start;gap:4px">${cardTeamBadgesHTML(card)}</span>
+        <div style="display:flex;justify-content:center">${cardIsRC?badgeHTML("RC"):""}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${catBadgeHTML(card.cat,card.group)}
+          ${card.sub&&card.sub!=="RC"?badgeHTML(card.sub):""}
+        </div>
+      </div>`;
+    }).join("")+`</div>`;
+}
+
+// ============================================================
+// IME-SAFE SEARCH — Stadium Club pattern
+// searchInput = live IME buffer (shown in input value)
+// search      = committed value (used for filtering)
+// ============================================================
+function initSearchInput(){
   const input=document.getElementById('search-input');
   if(!input) return;
 
-  // Track IME composition state
-  input.addEventListener('compositionstart',function(){
-    state.composing=true;
-  });
+  let composing=false;
 
-  input.addEventListener('compositionend',function(e){
-    state.composing=false;
-    // Fire search AFTER composition ends (catches the final composed character)
+  input.addEventListener('compositionstart',()=>{ composing=true; });
+
+  input.addEventListener('compositionend',e=>{
+    composing=false;
+    state.searchInput=e.target.value;
     state.search=e.target.value;
     render();
-    // Re-focus and restore cursor after render
     const el=document.getElementById('search-input');
-    if(el){
-      el.focus();
-      try{el.setSelectionRange(el.value.length,el.value.length);}catch(e){}
-    }
+    if(el){ el.focus(); try{el.setSelectionRange(el.value.length,el.value.length);}catch(_){} }
   });
 
-  // Only search on input if NOT composing (prevents mid-composition renders)
-  input.addEventListener('input',function(e){
-    if(state.composing) return;
+  input.addEventListener('input',e=>{
+    state.searchInput=e.target.value;   // always update live buffer
+    if(composing) return;               // don't filter mid-composition
     state.search=e.target.value;
     render();
-    // Restore focus after render
     const el=document.getElementById('search-input');
-    if(el){
-      el.focus();
-      try{el.setSelectionRange(el.value.length,el.value.length);}catch(e){}
-    }
+    if(el){ el.focus(); try{el.setSelectionRange(el.value.length,el.value.length);}catch(_){} }
   });
 
-  // Handle Enter / Escape
-  input.addEventListener('keydown',function(e){
-    if(e.key==='Escape'){
-      state.search='';
-      render();
-    }
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){ state.search=''; state.searchInput=''; render(); }
   });
 }
 
@@ -1236,8 +1261,8 @@ function closeModal(){state.modalPlayer=null;render();}
 function toggleStatsExpand(key){state.statsExpanded[key]=!state.statsExpanded[key];render();}
 function toggleStatsShowAll(key){state.statsShowAll[key]=!state.statsShowAll[key];render();}
 function clearFilters(){
-  state.search="";state.groupFilter="All";state.subCatFilter="All";
-  state.teamFilter="All";state.subFilter="All";state.rcFilter="All";
+  state.search=""; state.searchInput=""; state.groupFilter="All"; state.subCatFilter="All";
+  state.teamFilter="All"; state.subFilter="All"; state.rcFilter="All";
   render();
 }
 
