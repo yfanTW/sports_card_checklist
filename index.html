@@ -106,13 +106,80 @@
     animation: fadeDown 0.7s 0.2s ease both;
   }
 
+  /* ── YEAR TABS ── */
+  .tabs-wrapper {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    padding: 40px 40px 0;
+    gap: 8px;
+  }
+
+  .tab-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    padding: 10px 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tab-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(240,180,41,0.06);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .tab-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .tab-btn:hover::before { opacity: 1; }
+
+  .tab-btn.active {
+    color: var(--accent);
+    border-color: rgba(240,180,41,0.5);
+    background: rgba(240,180,41,0.08);
+  }
+
+  .tab-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    background: rgba(240,180,41,0.15);
+    color: var(--accent);
+    border-radius: 10px;
+    padding: 1px 7px;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: 0;
+  }
+
+  .tab-btn:not(.active) .tab-count {
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+  }
+
   /* ── GRID ── */
+  .tab-panel {
+    display: none;
+  }
+  .tab-panel.active {
+    display: block;
+  }
+
   .grid-container {
     position: relative;
     z-index: 1;
     max-width: 1100px;
     margin: 0 auto;
-    padding: 80px 40px;
+    padding: 48px 40px 80px;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 24px;
@@ -126,17 +193,17 @@
     border-radius: 12px;
     overflow: hidden;
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-    animation: fadeUp 0.6s ease both;
+    animation: fadeUp 0.5s ease both;
     cursor: pointer;
   }
 
-  .card-link:nth-child(1) { animation-delay: 0.1s; --accent-card: #64748b; --accent-card-rgb: 100,116,139; }
-  .card-link:nth-child(2) { animation-delay: 0.2s; --accent-card: #3b82f6; --accent-card-rgb: 59,130,246; }
-  .card-link:nth-child(3) { animation-delay: 0.3s; --accent-card: #10b981; --accent-card-rgb: 16,185,129; }
-  .card-link:nth-child(4) { animation-delay: 0.4s; --accent-card: #f59e0b; --accent-card-rgb: 245,158,11; }
-  .card-link:nth-child(5) { animation-delay: 0.5s; --accent-card: #8b5cf6; --accent-card-rgb: 139,92,246; }
-  .card-link:nth-child(6) { animation-delay: 0.6s; --accent-card: #ec4899; --accent-card-rgb: 236,72,153; }
-  .card-link:nth-child(7) { animation-delay: 0.7s; --accent-card: #f97316; --accent-card-rgb: 249,115,22; }
+  .card-link:nth-child(1) { animation-delay: 0.05s; --accent-card: #64748b; --accent-card-rgb: 100,116,139; }
+  .card-link:nth-child(2) { animation-delay: 0.10s; --accent-card: #3b82f6; --accent-card-rgb: 59,130,246; }
+  .card-link:nth-child(3) { animation-delay: 0.15s; --accent-card: #10b981; --accent-card-rgb: 16,185,129; }
+  .card-link:nth-child(4) { animation-delay: 0.20s; --accent-card: #f59e0b; --accent-card-rgb: 245,158,11; }
+  .card-link:nth-child(5) { animation-delay: 0.25s; --accent-card: #8b5cf6; --accent-card-rgb: 139,92,246; }
+  .card-link:nth-child(6) { animation-delay: 0.30s; --accent-card: #ec4899; --accent-card-rgb: 236,72,153; }
+  .card-link:nth-child(7) { animation-delay: 0.35s; --accent-card: #f97316; --accent-card-rgb: 249,115,22; }
 
   .card-link::before {
     content: '';
@@ -371,7 +438,9 @@
   /* ── RESPONSIVE ── */
   @media (max-width: 640px) {
     header { padding: 60px 24px 48px; }
-    .grid-container { grid-template-columns: 1fr; padding: 48px 24px; gap: 16px; }
+    .tabs-wrapper { padding: 32px 24px 0; }
+    .tab-btn { font-size: 18px; padding: 8px 22px; }
+    .grid-container { grid-template-columns: 1fr; padding: 32px 24px 60px; gap: 16px; }
     .card-inner { padding: 24px; min-height: 170px; }
     .card-title { font-size: 24px; }
   }
@@ -385,174 +454,137 @@
   <p class="header-sub">Interactive checklists for modern baseball card sets</p>
 </header>
 
-<div class="grid-container">
+<!-- Year Tabs -->
+<div class="tabs-wrapper">
+  <button class="tab-btn active" onclick="switchTab('2026', this)">2026 <span class="tab-count">4</span></button>
+  <button class="tab-btn" onclick="switchTab('2025', this)">2025 <span class="tab-count">5</span></button>
+</div>
 
-  <!-- 1. Topps Chrome Black 2026 -->
-  <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2026-topps-chrome-black-baseball.html" target="_blank" rel="noopener">
-    <div class="card-inner">
-      <img class="card-img" src="https://www.dacardworld.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/2/0/2025-topps-chrome-black-baseball-hobby-box.jpg" alt="2026 Topps Chrome Black Baseball" onerror="this.style.display='none'">
-      <div class="card-top">
-        <div class="card-arrow">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </div>
-      <div>
-        <div class="card-title">2026 Topps Chrome Black Baseball</div>
-        <div class="card-brand">Topps · Chrome Black</div>
-        <div class="card-footer">
-          <span class="tag">Base</span>
-          <span class="tag">Autograph</span>
-          <span class="tag">Refractor</span>
-        </div>
-      </div>
-    </div>
-  </a>
+<!-- 2026 Panel -->
+<div class="tab-panel active" id="panel-2026">
+  <div class="grid-container">
 
-  <!-- 2. Bowman 2026 -->
-  <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2026-bowman-baseball.html" target="_blank" rel="noopener">
-    <div class="card-inner">
-      <img class="card-img" src="https://www.diamondcardsonline.com.au/wp-content/uploads/2025/05/2025-Bowman-Baseball-Hobby-Box.jpg" alt="2026 Bowman Baseball" onerror="this.style.display='none'">
-      <div class="card-top">
-        <div class="card-arrow">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+    <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2026-topps-chrome-black-baseball.html" target="_blank" rel="noopener">
+      <div class="card-inner">
+        <img class="card-img" src="https://www.dacardworld.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/2/0/2025-topps-chrome-black-baseball-hobby-box.jpg" alt="2026 Topps Chrome Black Baseball" onerror="this.style.display='none'">
+        <div class="card-top"><div class="card-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div>
+          <div class="card-title">2026 Topps Chrome Black Baseball</div>
+          <div class="card-brand">Topps · Chrome Black</div>
+          <div class="card-footer"><span class="tag">Base</span><span class="tag">Autograph</span><span class="tag">Refractor</span></div>
         </div>
       </div>
-      <div>
-        <div class="card-title">2026 Bowman Baseball</div>
-        <div class="card-brand">Topps · Bowman</div>
-        <div class="card-footer">
-          <span class="tag">Base</span>
-          <span class="tag">Prospect</span>
-          <span class="tag">Chrome Auto</span>
-        </div>
-      </div>
-    </div>
-  </a>
+    </a>
 
-  <!-- Topps Now Road to Opening Day 2026 -->
-  <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2026-topps-now-road-to-opening-day-baseball.html" target="_blank" rel="noopener">
-    <div class="card-inner">
-      <img class="card-img" src="https://cdn.topps.com/media/catalog/product/cache/2/image/800x800/9df78eab33525d08d6e5fb8d27136e95/t/o/topps-now-road-to-opening-day.jpg" alt="2026 Topps Now Road to Opening Day" onerror="this.style.display='none'">
-      <div class="card-top">
-        <div class="card-arrow">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+    <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2026-bowman-baseball.html" target="_blank" rel="noopener">
+      <div class="card-inner">
+        <img class="card-img" src="https://www.diamondcardsonline.com.au/wp-content/uploads/2025/05/2025-Bowman-Baseball-Hobby-Box.jpg" alt="2026 Bowman Baseball" onerror="this.style.display='none'">
+        <div class="card-top"><div class="card-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div>
+          <div class="card-title">2026 Bowman Baseball</div>
+          <div class="card-brand">Topps · Bowman</div>
+          <div class="card-footer"><span class="tag">Base</span><span class="tag">Prospect</span><span class="tag">Chrome Auto</span></div>
         </div>
       </div>
-      <div>
-        <div class="card-title">2026 Topps Now Road to Opening Day</div>
-        <div class="card-brand">Topps · Topps Now</div>
-        <div class="card-footer">
-          <span class="tag">Base</span>
-          <span class="tag">Team Set</span>
-          <span class="tag">Parallel</span>
-        </div>
-      </div>
-    </div>
-  </a>
+    </a>
 
-  <!-- Topps Series 1 Japan Edition 2026 -->
-  <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2026-topps-series-1-baseball-japan-edition.html" target="_blank" rel="noopener">
-    <div class="card-inner">
-      <img class="card-img" src="https://images.squarespace-cdn.com/content/v1/5e9a0174bb80c91c3a6e67c5/1736968547225-UZSDCN2M3LXQ4LKJP1ZX/2026-topps-series-1-baseball-mega-box.jpg" alt="2026 Topps Series 1 Japan Edition" onerror="this.style.display='none'">
-      <div class="card-top">
-        <div class="card-arrow">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+    <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2026-topps-now-road-to-opening-day-baseball.html" target="_blank" rel="noopener">
+      <div class="card-inner">
+        <img class="card-img" src="https://cdn.topps.com/media/catalog/product/cache/2/image/800x800/9df78eab33525d08d6e5fb8d27136e95/t/o/topps-now-road-to-opening-day.jpg" alt="2026 Topps Now Road to Opening Day" onerror="this.style.display='none'">
+        <div class="card-top"><div class="card-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div>
+          <div class="card-title">2026 Topps Now Road to Opening Day</div>
+          <div class="card-brand">Topps · Topps Now</div>
+          <div class="card-footer"><span class="tag">Base</span><span class="tag">Team Set</span><span class="tag">Parallel</span></div>
         </div>
       </div>
-      <div>
-        <div class="card-title">2026 Topps Series 1 Japan Edition</div>
-        <div class="card-brand">Topps · Series 1 · 日本限定</div>
-        <div class="card-footer">
-          <span class="tag">Japan Edition</span>
-          <span class="tag">Insert</span>
-          <span class="tag">Autograph</span>
-        </div>
-      </div>
-    </div>
-  </a>
+    </a>
 
-  <!-- 3. Bowman's Best 2025 -->
-  <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2025-bowmans-best-baseball.html" target="_blank" rel="noopener">
-    <div class="card-inner">
-      <img class="card-img" src="https://www.cardboardconnection.com/wp-content/uploads/2025/01/2025-Bowmans-Best-Baseball.jpg" alt="2025 Bowman's Best Baseball" onerror="this.style.display='none'">
-      <div class="card-top">
-        <div class="card-arrow">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+    <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2026-topps-series-1-baseball-japan-edition.html" target="_blank" rel="noopener">
+      <div class="card-inner">
+        <img class="card-img" src="https://images.squarespace-cdn.com/content/v1/5e9a0174bb80c91c3a6e67c5/1736968547225-UZSDCN2M3LXQ4LKJP1ZX/2026-topps-series-1-baseball-mega-box.jpg" alt="2026 Topps Series 1 Japan Edition" onerror="this.style.display='none'">
+        <div class="card-top"><div class="card-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div>
+          <div class="card-title">2026 Topps Series 1 Japan Edition</div>
+          <div class="card-brand">Topps · Series 1 · 日本限定</div>
+          <div class="card-footer"><span class="tag">Japan Edition</span><span class="tag">Insert</span><span class="tag">Autograph</span></div>
         </div>
       </div>
-      <div>
-        <div class="card-title">2025 Bowman's Best Baseball</div>
-        <div class="card-brand">Topps · Bowman's Best</div>
-        <div class="card-footer">
-          <span class="tag">Base</span>
-          <span class="tag">Autograph</span>
-          <span class="tag">Insert</span>
-        </div>
-      </div>
-    </div>
-  </a>
+    </a>
 
-  <!-- 4. Topps Pristine 2025 -->
-  <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2025-topps-pristine-baseball.html" target="_blank" rel="noopener">
-    <div class="card-inner">
-      <img class="card-img" src="https://www.dacardworld.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/2/0/2025-topps-pristine-baseball-hobby-box-x.jpg" alt="2025 Topps Pristine Baseball" onerror="this.style.display='none'">
-      <div class="card-top">
-        <div class="card-arrow">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </div>
-      <div>
-        <div class="card-title">2025 Topps Pristine Baseball</div>
-        <div class="card-brand">Topps · Pristine</div>
-        <div class="card-footer">
-          <span class="tag">Base</span>
-          <span class="tag">Autograph</span>
-          <span class="tag">Relic</span>
-        </div>
-      </div>
-    </div>
-  </a>
+  </div>
+</div>
 
-  <!-- 5. Topps Museum Collection 2025 -->
-  <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2025-topps-museum-collection-baseball.html" target="_blank" rel="noopener">
-    <div class="card-inner">
-      <img class="card-img" src="https://www.dacardworld.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/2/0/2025-topps-museum-collection-baseball-hobby-box.jpg" alt="2025 Topps Museum Collection Baseball" onerror="this.style.display='none'">
-      <div class="card-top">
-        <div class="card-arrow">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </div>
-      <div>
-        <div class="card-title">2025 Topps Museum Collection Baseball</div>
-        <div class="card-brand">Topps · Museum Collection</div>
-        <div class="card-footer">
-          <span class="tag">Base</span>
-          <span class="tag">Autograph</span>
-          <span class="tag">Relic</span>
-        </div>
-      </div>
-    </div>
-  </a>
+<!-- 2025 Panel -->
+<div class="tab-panel" id="panel-2025">
+  <div class="grid-container">
 
+    <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2025-bowmans-best-baseball.html" target="_blank" rel="noopener">
+      <div class="card-inner">
+        <img class="card-img" src="https://www.cardboardconnection.com/wp-content/uploads/2025/01/2025-Bowmans-Best-Baseball.jpg" alt="2025 Bowman's Best Baseball" onerror="this.style.display='none'">
+        <div class="card-top"><div class="card-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div>
+          <div class="card-title">2025 Bowman's Best Baseball</div>
+          <div class="card-brand">Topps · Bowman's Best</div>
+          <div class="card-footer"><span class="tag">Base</span><span class="tag">Autograph</span><span class="tag">Insert</span></div>
+        </div>
+      </div>
+    </a>
+
+    <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2025-topps-pristine-baseball.html" target="_blank" rel="noopener">
+      <div class="card-inner">
+        <img class="card-img" src="https://www.dacardworld.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/2/0/2025-topps-pristine-baseball-hobby-box-x.jpg" alt="2025 Topps Pristine Baseball" onerror="this.style.display='none'">
+        <div class="card-top"><div class="card-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div>
+          <div class="card-title">2025 Topps Pristine Baseball</div>
+          <div class="card-brand">Topps · Pristine</div>
+          <div class="card-footer"><span class="tag">Base</span><span class="tag">Autograph</span><span class="tag">Relic</span></div>
+        </div>
+      </div>
+    </a>
+
+    <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2025-topps-museum-collection-baseball.html" target="_blank" rel="noopener">
+      <div class="card-inner">
+        <img class="card-img" src="https://www.dacardworld.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/2/0/2025-topps-museum-collection-baseball-hobby-box.jpg" alt="2025 Topps Museum Collection Baseball" onerror="this.style.display='none'">
+        <div class="card-top"><div class="card-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div>
+          <div class="card-title">2025 Topps Museum Collection Baseball</div>
+          <div class="card-brand">Topps · Museum Collection</div>
+          <div class="card-footer"><span class="tag">Base</span><span class="tag">Autograph</span><span class="tag">Relic</span></div>
+        </div>
+      </div>
+    </a>
+
+    <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2025-topps-stadium-club-baseball.html" target="_blank" rel="noopener">
+      <div class="card-inner">
+        <img class="card-img" src="https://www.cardboardconnection.com/wp-content/uploads/2024/10/2025-Topps-Stadium-Club-Baseball.jpg" alt="2025 Topps Stadium Club Baseball" onerror="this.style.display='none'">
+        <div class="card-top"><div class="card-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div>
+          <div class="card-title">2025 Topps Stadium Club Baseball</div>
+          <div class="card-brand">Topps · Stadium Club</div>
+          <div class="card-footer"><span class="tag">Base</span><span class="tag">Autograph</span><span class="tag">Photo</span></div>
+        </div>
+      </div>
+    </a>
+
+    <a class="card-link" href="https://yfantw.github.io/sports_card_checklist/2025-topps-cosmic-chrome-baseball.html" target="_blank" rel="noopener">
+      <div class="card-inner">
+        <img class="card-img" src="https://www.dacardworld.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/2/0/2025-topps-cosmic-chrome-baseball-hobby-box.jpg" alt="2025 Topps Cosmic Chrome Baseball" onerror="this.style.display='none'">
+        <div class="card-top"><div class="card-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 11.5L11.5 2.5M11.5 2.5H5.5M11.5 2.5V8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+        <div>
+          <div class="card-title">2025 Topps Cosmic Chrome Baseball</div>
+          <div class="card-brand">Topps · Cosmic Chrome</div>
+          <div class="card-footer"><span class="tag">Base</span><span class="tag">Autograph</span><span class="tag">Refractor</span></div>
+        </div>
+      </div>
+    </a>
+
+  </div>
 </div>
 
 <div class="divider">
   <span class="divider-line"></span>
-  <span class="divider-text">7 Sets Available</span>
+  <span class="divider-text" id="set-count">4 Sets · 2026</span>
   <span class="divider-line"></span>
 </div>
 
@@ -576,6 +608,25 @@
 </footer>
 
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+  const tabInfo = { '2026': '4 Sets · 2026', '2025': '5 Sets · 2025' };
+
+  function switchTab(year, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panel = document.getElementById('panel-' + year);
+    panel.classList.add('active');
+    // re-trigger card animations
+    panel.querySelectorAll('.card-link').forEach((c, i) => {
+      c.style.animation = 'none';
+      c.offsetHeight;
+      c.style.animation = '';
+      c.style.animationDelay = (i * 0.05 + 0.05) + 's';
+    });
+    document.getElementById('set-count').textContent = tabInfo[year];
+  }
+</script>
 
 </body>
 </html>

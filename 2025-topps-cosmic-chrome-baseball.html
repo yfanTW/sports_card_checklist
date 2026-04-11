@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2025 Topps Cosmic Chrome Baseball — Complete Checklist</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+  min-height: 100vh;
+  color: #f1f5f9;
+}
+select option { background: #1e293b; color: #f1f5f9; }
+input::placeholder { color: #64748b; }
+input:focus { outline: none; border-color: rgba(99,102,241,0.6) !important; }
+select:focus { outline: none; }
+* { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ============================================================
+// TEAM DATA
+// ============================================================
+const TEAM_COLORS = {
+  "New York Yankees":"#003087","Los Angeles Dodgers":"#005A9C","Boston Red Sox":"#BD3039",
+  "Chicago Cubs":"#0E3386","Atlanta Braves":"#CE1141","San Francisco Giants":"#FD5A1E",
+  "Philadelphia Phillies":"#E81828","Houston Astros":"#EB6E1F","San Diego Padres":"#2F241D",
+  "Seattle Mariners":"#0C2C56","Cleveland Guardians":"#00385D","Kansas City Royals":"#004687",
+  "Baltimore Orioles":"#DF4601","Milwaukee Brewers":"#FFC52F","Minnesota Twins":"#002B5C",
+  "Detroit Tigers":"#0C2340","Cincinnati Reds":"#C6011F","Toronto Blue Jays":"#134A8E",
+  "Tampa Bay Rays":"#092C5C","Pittsburgh Pirates":"#FDB827","Texas Rangers":"#003278",
+  "Arizona Diamondbacks":"#A71930","Colorado Rockies":"#333366","Washington Nationals":"#AB0003",
+  "Miami Marlins":"#00A3E0","Chicago White Sox":"#27251F","New York Mets":"#002D72",
+  "Los Angeles Angels":"#BA0021","Athletics":"#003831","St. Louis Cardinals":"#C41E3A",
+  "Oakland Athletics":"#003831","California Angels":"#BA0021","Angels":"#BA0021",
+  "National League":"#003087","American League":"#AB0003",
+};
+const TEAM_ABBR = {
+  "New York Yankees":"NYY","Los Angeles Dodgers":"LAD","Boston Red Sox":"BOS",
+  "Chicago Cubs":"CHC","Atlanta Braves":"ATL","San Francisco Giants":"SF",
+  "Philadelphia Phillies":"PHI","Houston Astros":"HOU","San Diego Padres":"SD",
+  "Seattle Mariners":"SEA","Cleveland Guardians":"CLE","Kansas City Royals":"KC",
+  "Baltimore Orioles":"BAL","Milwaukee Brewers":"MIL","Minnesota Twins":"MIN",
+  "Detroit Tigers":"DET","Cincinnati Reds":"CIN","Toronto Blue Jays":"TOR",
+  "Tampa Bay Rays":"TB","Pittsburgh Pirates":"PIT","Texas Rangers":"TEX",
+  "Arizona Diamondbacks":"ARI","Colorado Rockies":"COL","Washington Nationals":"WSH",
+  "Miami Marlins":"MIA","Chicago White Sox":"CWS","New York Mets":"NYM",
+  "Los Angeles Angels":"LAA","Athletics":"OAK","St. Louis Cardinals":"STL",
+  "Oakland Athletics":"OAK","California Angels":"CAL","Angels":"LAA",
+  "National League":"NL","American League":"AL",
+};
+function getTeamColor(t){return TEAM_COLORS[t]||"#6366f1";}
+function getTeamAbbr(t){return TEAM_ABBR[t]||t.slice(0,3).toUpperCase();}
+
+// ============================================================
+// ALL DATA
+// ============================================================
+const ALL_DATA = [
+  // Base Set (200 cards)
+  ...[
+    ["1","James Wood","Washington Nationals","RC"],
+    ["2","Yu Darvish","San Diego Padres",null],
+    ["3","Colton Cowser","Baltimore Orioles",null],
+    ["4","Ryan Bliss","Seattle Mariners","RC"],
+    ["5","Will Wagner","San Diego Padres","RC"],
+    ["6","Cal Raleigh","Seattle Mariners",null],
+    ["7","Victor Mesa Jr.","Miami Marlins","RC"],
+    ["8","Chris Sale","Atlanta Braves",null],
+    ["9","Jace Jung","Detroit Tigers","RC"],
+    ["10","Bryan Reynolds","Pittsburgh Pirates",null],
+    ["11","Corey Seager","Texas Rangers",null],
+    ["12","Chase Meidroth","Chicago White Sox","RC"],
+    ["13","Kyle Schwarber","Philadelphia Phillies",null],
+    ["14","Austin Wells","New York Yankees",null],
+    ["15","Jhonkensy Noel","Cleveland Guardians","RC"],
+    ["16","Bo Bichette","Toronto Blue Jays",null],
+    ["17","Drew Romo","Colorado Rockies","RC"],
+    ["18","Chase Dollander","Colorado Rockies","RC"],
+    ["19","Royce Lewis","Minnesota Twins",null],
+    ["20","Ezequiel Tovar","Colorado Rockies",null],
+    ["21","Fernando Tatis Jr.","San Diego Padres",null],
+    ["22","Jose Altuve","Houston Astros",null],
+    ["23","Will Warren","New York Yankees","RC"],
+    ["24","Luisangel Acuña","New York Mets","RC"],
+    ["25","Bobby Witt Jr.","Kansas City Royals",null],
+    ["26","Cade Horton","Chicago Cubs","RC"],
+    ["27","Giancarlo Stanton","New York Yankees",null],
+    ["28","Grant McCray","San Francisco Giants","RC"],
+    ["29","Adolis García","Texas Rangers",null],
+    ["30","Vladimir Guerrero Jr.","Toronto Blue Jays",null],
+    ["31","Chase Petty","Cincinnati Reds","RC"],
+    ["32","Nick Yorke","Pittsburgh Pirates","RC"],
+    ["33","Christian Walker","Houston Astros",null],
+    ["34","Logan Gilbert","Seattle Mariners",null],
+    ["35","Matt Shaw","Chicago Cubs","RC"],
+    ["36","Mark Vientos","New York Mets",null],
+    ["37","Francisco Alvarez","New York Mets",null],
+    ["38","Cody Bellinger","New York Yankees",null],
+    ["39","Garrett Crochet","Boston Red Sox",null],
+    ["40","Max Muncy","Athletics","RC"],
+    ["41","Heliot Ramos","San Francisco Giants",null],
+    ["42","Max Fried","New York Yankees",null],
+    ["43","Nacho Alvarez Jr.","Atlanta Braves","RC"],
+    ["44","Thomas Saggese","St. Louis Cardinals","RC"],
+    ["45","Brooks Baldwin","Chicago White Sox","RC"],
+    ["46","Alex Bregman","Boston Red Sox",null],
+    ["47","Kristian Campbell","Boston Red Sox","RC"],
+    ["48","Yoshinobu Yamamoto","Los Angeles Dodgers",null],
+    ["49","Oneil Cruz","Pittsburgh Pirates",null],
+    ["50","Rhett Lowder","Cincinnati Reds","RC"],
+    ["51","Isaac Collins","Milwaukee Brewers","RC"],
+    ["52","Vinnie Pasquantino","Kansas City Royals",null],
+    ["53","Dalton Rushing","Los Angeles Dodgers","RC"],
+    ["54","Luis Arraez","San Diego Padres",null],
+    ["55","Agustín Ramírez","Miami Marlins","RC"],
+    ["56","Shohei Ohtani","Los Angeles Dodgers",null],
+    ["57","Nico Hoerner","Chicago Cubs",null],
+    ["58","Moisés Ballesteros","Chicago Cubs","RC"],
+    ["59","Kevin Alcántara","Chicago Cubs","RC"],
+    ["60","Steven Kwan","Cleveland Guardians",null],
+    ["61","Kris Bryant","Colorado Rockies",null],
+    ["62","Braxton Ashcraft","Pittsburgh Pirates","RC"],
+    ["63","Salvador Perez","Kansas City Royals",null],
+    ["64","Jung Hoo Lee","San Francisco Giants",null],
+    ["65","Orelvis Martinez","Toronto Blue Jays","RC"],
+    ["66","Justin Verlander","San Francisco Giants",null],
+    ["67","Nic Enright","Cleveland Guardians","RC"],
+    ["68","Roki Sasaki","Los Angeles Dodgers","RC"],
+    ["69","Christian Yelich","Milwaukee Brewers",null],
+    ["70","Marcus Semien","Texas Rangers",null],
+    ["71","Wilyer Abreu","Boston Red Sox",null],
+    ["72","Matt Chapman","San Francisco Giants",null],
+    ["73","Riley Greene","Detroit Tigers",null],
+    ["74","Gleyber Torres","Detroit Tigers",null],
+    ["75","Justyn-Henry Malloy","Detroit Tigers","RC"],
+    ["76","Byron Buxton","Minnesota Twins",null],
+    ["77","Teoscar Hernández","Los Angeles Dodgers",null],
+    ["78","Dillon Dingler","Detroit Tigers","RC"],
+    ["79","Thomas Harrington","Pittsburgh Pirates","RC"],
+    ["80","Lawrence Butler","Athletics",null],
+    ["81","Hunter Greene","Cincinnati Reds",null],
+    ["82","Gerrit Cole","New York Yankees",null],
+    ["83","Daylen Lile","Washington Nationals","RC"],
+    ["84","Leo Jiménez","Toronto Blue Jays","RC"],
+    ["85","George Springer","Toronto Blue Jays",null],
+    ["86","Manny Machado","San Diego Padres",null],
+    ["87","Austin Riley","Atlanta Braves",null],
+    ["88","Logan Webb","San Francisco Giants",null],
+    ["89","Jeremy Peña","Houston Astros",null],
+    ["90","Isaac Paredes","Houston Astros",null],
+    ["91","Marcelo Mayer","Boston Red Sox","RC"],
+    ["92","Jorbit Vivas","New York Yankees","RC"],
+    ["93","Zac Veen","Colorado Rockies","RC"],
+    ["94","Rece Hinds","Cincinnati Reds","RC"],
+    ["95","Julio Rodríguez","Seattle Mariners",null],
+    ["96","Drake Baldwin","Atlanta Braves","RC"],
+    ["97","Adael Amador","Colorado Rockies","RC"],
+    ["98","Freddie Freeman","Los Angeles Dodgers",null],
+    ["99","Mookie Betts","Los Angeles Dodgers",null],
+    ["100","Paul Skenes","Pittsburgh Pirates",null],
+    ["101","Carlos Correa","Houston Astros",null],
+    ["102","Adley Rutschman","Baltimore Orioles",null],
+    ["103","Corbin Carroll","Arizona Diamondbacks",null],
+    ["104","Pete Crow-Armstrong","Chicago Cubs",null],
+    ["105","Spencer Strider","Atlanta Braves",null],
+    ["106","Francisco Lindor","New York Mets",null],
+    ["107","José Ramírez","Cleveland Guardians",null],
+    ["108","Robert Hassell III","Washington Nationals","RC"],
+    ["109","Ozzie Albies","Atlanta Braves",null],
+    ["110","Jordan Lawlar","Arizona Diamondbacks",null],
+    ["111","Aaron Nola","Philadelphia Phillies",null],
+    ["112","Yordan Alvarez","Houston Astros",null],
+    ["113","Zach Neto","Los Angeles Angels",null],
+    ["114","Connor Norby","Miami Marlins","RC"],
+    ["115","Jarren Duran","Boston Red Sox",null],
+    ["116","Max Scherzer","Toronto Blue Jays",null],
+    ["117","Andrew McCutchen","Pittsburgh Pirates",null],
+    ["118","Gunnar Henderson","Baltimore Orioles",null],
+    ["119","Masyn Winn","St. Louis Cardinals",null],
+    ["120","Kumar Rocker","Texas Rangers","RC"],
+    ["121","Luis Castillo","Seattle Mariners",null],
+    ["122","Freddy Peralta","Milwaukee Brewers",null],
+    ["123","Trea Turner","Philadelphia Phillies",null],
+    ["124","Jackson Chourio","Milwaukee Brewers",null],
+    ["125","Javier Báez","Detroit Tigers",null],
+    ["126","Edgar Quero","Chicago White Sox","RC"],
+    ["127","Tarik Skubal","Detroit Tigers",null],
+    ["128","Clayton Kershaw","Los Angeles Dodgers",null],
+    ["129","Brooks Lee","Minnesota Twins","RC"],
+    ["130","Jackson Merrill","San Diego Padres",null],
+    ["131","Blake Snell","Los Angeles Dodgers",null],
+    ["132","Elly De La Cruz","Cincinnati Reds",null],
+    ["133","Jasson Domínguez","New York Yankees",null],
+    ["134","MacKenzie Gore","Washington Nationals",null],
+    ["135","Seiya Suzuki","Chicago Cubs",null],
+    ["136","Carlos Narváez","Boston Red Sox","RC"],
+    ["137","Dustin Harris","Texas Rangers","RC"],
+    ["138","Matt Olson","Atlanta Braves",null],
+    ["139","Jacob Wilson","Athletics","RC"],
+    ["140","Caden Dana","Los Angeles Angels","RC"],
+    ["141","Zack Wheeler","Philadelphia Phillies",null],
+    ["142","Jackson Jobe","Detroit Tigers","RC"],
+    ["143","Juan Soto","New York Mets",null],
+    ["144","Randy Arozarena","Seattle Mariners",null],
+    ["145","Angel Martínez","Cleveland Guardians","RC"],
+    ["146","Michael Harris II","Atlanta Braves",null],
+    ["147","Denzel Clarke","Athletics","RC"],
+    ["148","Junior Caminero","Tampa Bay Rays",null],
+    ["149","Luis Robert Jr.","Chicago White Sox",null],
+    ["150","David Festa","Minnesota Twins","RC"],
+    ["151","Pete Alonso","New York Mets",null],
+    ["152","Tomoyuki Sugano","Baltimore Orioles","RC"],
+    ["153","Luke Keaschall","Minnesota Twins","RC"],
+    ["154","Coby Mayo","Baltimore Orioles","RC"],
+    ["155","Zach Dezenzo","Houston Astros","RC"],
+    ["156","Jazz Chisholm Jr.","New York Yankees",null],
+    ["157","Spencer Schwellenbach","Atlanta Braves","RC"],
+    ["158","Sandy Alcantara","Miami Marlins",null],
+    ["159","Paul Goldschmidt","New York Yankees",null],
+    ["160","Mick Abel","Minnesota Twins","RC"],
+    ["161","Logan O'Hoppe","Los Angeles Angels",null],
+    ["162","Chandler Simpson","Tampa Bay Rays","RC"],
+    ["163","Jackson Holliday","Baltimore Orioles",null],
+    ["164","Kyle Tucker","Chicago Cubs",null],
+    ["165","Ronald Acuña Jr.","Atlanta Braves",null],
+    ["166","Cam Smith","Houston Astros","RC"],
+    ["167","Griffin Conine","Miami Marlins","RC"],
+    ["168","Dylan Cease","San Diego Padres",null],
+    ["169","Will Smith","Los Angeles Dodgers",null],
+    ["170","Ben Williamson","Seattle Mariners","RC"],
+    ["171","William Contreras","Milwaukee Brewers",null],
+    ["172","Aaron Schunk","Colorado Rockies","RC"],
+    ["173","Edwin Díaz","New York Mets",null],
+    ["174","Ben Rice","New York Yankees","RC"],
+    ["175","Ketel Marte","Arizona Diamondbacks",null],
+    ["176","Alejandro Osuna","Texas Rangers","RC"],
+    ["177","CJ Abrams","Washington Nationals",null],
+    ["178","Trey Sweeney","Detroit Tigers","RC"],
+    ["179","Nolan Arenado","St. Louis Cardinals",null],
+    ["180","Kyle Manzardo","Cleveland Guardians",null],
+    ["181","Hyeseong Kim","Los Angeles Dodgers","RC"],
+    ["182","Alan Roden","Minnesota Twins","RC"],
+    ["183","Nick Kurtz","Athletics","RC"],
+    ["184","Drew Thorpe","Chicago White Sox","RC"],
+    ["185","Aaron Judge","New York Yankees",null],
+    ["186","Rafael Devers","San Francisco Giants",null],
+    ["187","Dansby Swanson","Chicago Cubs",null],
+    ["188","Mike Trout","Los Angeles Angels",null],
+    ["189","Wyatt Langford","Texas Rangers",null],
+    ["190","Corbin Burnes","Arizona Diamondbacks",null],
+    ["191","River Ryan","Los Angeles Dodgers","RC"],
+    ["192","Shota Imanaga","Chicago Cubs",null],
+    ["193","Kameron Misner","Tampa Bay Rays","RC"],
+    ["194","Dylan Crews","Washington Nationals","RC"],
+    ["195","Tyler Locklear","Arizona Diamondbacks","RC"],
+    ["196","Willy Adames","San Francisco Giants",null],
+    ["197","Caleb Durbin","Milwaukee Brewers","RC"],
+    ["198","Jacob deGrom","Texas Rangers",null],
+    ["199","Brent Rooker","Athletics",null],
+    ["200","Bryce Harper","Philadelphia Phillies",null],
+  ].map(([n,p,t,sub])=>({n,p,t,group:"Base",cat:"Base Set",sub})),
+
+  // Base – Constellation Variation (SSP)
+  ...[
+    ["1","James Wood","Washington Nationals"],
+    ["25","Bobby Witt Jr.","Kansas City Royals"],
+    ["26","Cade Horton","Chicago Cubs"],
+    ["30","Vladimir Guerrero Jr.","Toronto Blue Jays"],
+    ["35","Matt Shaw","Chicago Cubs"],
+    ["47","Kristian Campbell","Boston Red Sox"],
+    ["56","Shohei Ohtani","Los Angeles Dodgers"],
+    ["68","Roki Sasaki","Los Angeles Dodgers"],
+    ["91","Marcelo Mayer","Boston Red Sox"],
+    ["96","Drake Baldwin","Atlanta Braves"],
+    ["98","Freddie Freeman","Los Angeles Dodgers"],
+    ["100","Paul Skenes","Pittsburgh Pirates"],
+    ["129","Brooks Lee","Minnesota Twins"],
+    ["132","Elly De La Cruz","Cincinnati Reds"],
+    ["139","Jacob Wilson","Athletics"],
+    ["142","Jackson Jobe","Detroit Tigers"],
+    ["154","Coby Mayo","Baltimore Orioles"],
+    ["165","Ronald Acuña Jr.","Atlanta Braves"],
+    ["166","Cam Smith","Houston Astros"],
+    ["174","Ben Rice","New York Yankees"],
+    ["181","Hyeseong Kim","Los Angeles Dodgers"],
+    ["183","Nick Kurtz","Athletics"],
+    ["185","Aaron Judge","New York Yankees"],
+    ["194","Dylan Crews","Washington Nationals"],
+    ["200","Bryce Harper","Philadelphia Phillies"],
+  ].map(([n,p,t])=>({n,p,t,group:"Base",cat:"Constellation Variation",sub:null})),
+
+  // Cosmic Chrome Autographs
+  ...[
+    ["CCA-AA","Adael Amador","Colorado Rockies"],
+    ["CCA-AM","Angel Martínez","Cleveland Guardians"],
+    ["CCA-AR","Adley Rutschman","Baltimore Orioles"],
+    ["CCA-ARI","Austin Riley","Atlanta Braves"],
+    ["CCA-AW","Austin Wells","New York Yankees"],
+    ["CCA-BL","Brooks Lee","Minnesota Twins"],
+    ["CCA-BR","Ben Rice","New York Yankees"],
+    ["CCA-CA","CJ Abrams","Washington Nationals"],
+    ["CCA-CC","Colton Cowser","Baltimore Orioles"],
+    ["CCA-CCA","Corbin Carroll","Arizona Diamondbacks"],
+    ["CCA-CK","Colt Keith","Detroit Tigers"],
+    ["CCA-CN","Connor Norby","Miami Marlins"],
+    ["CCA-CS","Cam Smith","Houston Astros"],
+    ["CCA-CY","Christian Yelich","Milwaukee Brewers"],
+    ["CCA-DC","Dylan Crews","Washington Nationals"],
+    ["CCA-DT","Drew Thorpe","Chicago White Sox"],
+    ["CCA-EC","Evan Carter","Texas Rangers"],
+    ["CCA-GM","Grant McCray","San Francisco Giants"],
+    ["CCA-HK","Hyeseong Kim","Los Angeles Dodgers"],
+    ["CCA-HW","Hurston Waldrep","Atlanta Braves"],
+    ["CCA-IH","Ian Happ","Chicago Cubs"],
+    ["CCA-JA","Jose Altuve","Houston Astros"],
+    ["CCA-JC","Jackson Chourio","Milwaukee Brewers"],
+    ["CCA-JD","Jasson Domínguez","New York Yankees"],
+    ["CCA-JH","Jackson Holliday","Baltimore Orioles"],
+    ["CCA-JJ","Jace Jung","Detroit Tigers"],
+    ["CCA-JM","Justyn-Henry Malloy","Detroit Tigers"],
+    ["CCA-JN","Jhonkensy Noel","Cleveland Guardians"],
+    ["CCA-JRA","José Ramírez","Cleveland Guardians"],
+    ["CCA-JW","Jacob Wilson","Athletics"],
+    ["CCA-JWO","James Wood","Washington Nationals"],
+    ["CCA-KA","Kevin Alcántara","Chicago Cubs"],
+    ["CCA-KC","Kristian Campbell","Boston Red Sox"],
+    ["CCA-KR","Kumar Rocker","Texas Rangers"],
+    ["CCA-LA","Luisangel Acuña","New York Mets"],
+    ["CCA-MC","Matt Chapman","San Francisco Giants"],
+    ["CCA-MM","Marcelo Mayer","Boston Red Sox"],
+    ["CCA-MMA","Manny Machado","San Diego Padres"],
+    ["CCA-MO","Matt Olson","Atlanta Braves"],
+    ["CCA-MSH","Matt Shaw","Chicago Cubs"],
+    ["CCA-NA","Nolan Arenado","St. Louis Cardinals"],
+    ["CCA-NAL","Nacho Alvarez Jr.","Atlanta Braves"],
+    ["CCA-NK","Nick Kurtz","Athletics"],
+    ["CCA-PS","Paul Skenes","Pittsburgh Pirates"],
+    ["CCA-RAC","Ronald Acuña Jr.","Atlanta Braves"],
+    ["CCA-RB","Ryan Bliss","Seattle Mariners"],
+    ["CCA-RH","Rece Hinds","Cincinnati Reds"],
+    ["CCA-RL","Rhett Lowder","Cincinnati Reds"],
+    ["CCA-RR","River Ryan","Los Angeles Dodgers"],
+    ["CCA-RS","Roki Sasaki","Los Angeles Dodgers"],
+    ["CCA-SS","Spencer Schwellenbach","Atlanta Braves"],
+    ["CCA-TL","Tyler Locklear","Seattle Mariners"],
+    ["CCA-TS","Thomas Saggese","St. Louis Cardinals"],
+    ["CCA-TT","Trea Turner","Philadelphia Phillies"],
+    ["CCA-WL","Wyatt Langford","Texas Rangers"],
+    ["CCA-YY","Yoshinobu Yamamoto","Los Angeles Dodgers"],
+  ].map(([n,p,t])=>({n,p,t,group:"Autograph",cat:"Cosmic Chrome Autographs",sub:"Auto"})),
+
+  // Extraterrestrial Talent Autographs
+  ...[
+    ["ETA-AJ","Aaron Judge","New York Yankees"],
+    ["ETA-BL","Brooks Lee","Minnesota Twins"],
+    ["ETA-CMA","Coby Mayo","Baltimore Orioles"],
+    ["ETA-ED","Elly De La Cruz","Cincinnati Reds"],
+    ["ETA-FL","Francisco Lindor","New York Mets"],
+    ["ETA-JC","Junior Caminero","Tampa Bay Rays"],
+    ["ETA-JCJ","Jazz Chisholm Jr.","New York Yankees"],
+    ["ETA-JJ","Jace Jung","Detroit Tigers"],
+    ["ETA-JJU","Josh Jung","Texas Rangers"],
+    ["ETA-JM","Jackson Merrill","San Diego Padres"],
+    ["ETA-JS","Juan Soto","New York Mets"],
+    ["ETA-KA","Kevin Alcántara","Chicago Cubs"],
+    ["ETA-KT","Kyle Tucker","Chicago Cubs"],
+    ["ETA-LA","Luisangel Acuña","New York Mets"],
+    ["ETA-MT","Mike Trout","Los Angeles Angels"],
+    ["ETA-RAC","Ronald Acuña Jr.","Atlanta Braves"],
+    ["ETA-RL","Rhett Lowder","Cincinnati Reds"],
+    ["ETA-RS","Roki Sasaki","Los Angeles Dodgers"],
+  ].map(([n,p,t])=>({n,p,t,group:"Autograph",cat:"Extraterrestrial Talent Autographs",sub:"Auto"})),
+
+  // Launched Into Orbit Autographs
+  ...[
+    ["LIOA-AB","Adrian Beltré","Texas Rangers"],
+    ["LIOA-AM","Andrew McCutchen","Pittsburgh Pirates"],
+    ["LIOA-AP","Albert Pujols","St. Louis Cardinals"],
+    ["LIOA-AR","Adley Rutschman","Baltimore Orioles"],
+    ["LIOA-ARI","Austin Riley","Atlanta Braves"],
+    ["LIOA-ARO","Alex Rodriguez","New York Yankees"],
+    ["LIOA-BB","Barry Bonds","San Francisco Giants"],
+    ["LIOA-BH","Bryce Harper","Philadelphia Phillies"],
+    ["LIOA-BP","Buster Posey","San Francisco Giants"],
+    ["LIOA-BR","Brent Rooker","Athletics"],
+    ["LIOA-CC","Colton Cowser","Baltimore Orioles"],
+    ["LIOA-CJ","Chipper Jones","Atlanta Braves"],
+    ["LIOA-CR","Cal Ripken Jr.","Baltimore Orioles"],
+    ["LIOA-DC","Dylan Crews","Washington Nationals"],
+    ["LIOA-DM","Dale Murphy","Atlanta Braves"],
+    ["LIOA-DMA","Don Mattingly","New York Yankees"],
+    ["LIOA-DO","David Ortiz","Boston Red Sox"],
+    ["LIOA-EM","Eddie Murray","Baltimore Orioles"],
+    ["LIOA-FM","Fred McGriff","Atlanta Braves"],
+    ["LIOA-FT","Frank Thomas","Chicago White Sox"],
+    ["LIOA-GB","George Brett","Kansas City Royals"],
+    ["LIOA-HM","Hideki Matsui","New York Yankees"],
+    ["LIOA-JB","Jeff Bagwell","Houston Astros"],
+    ["LIOA-JC","Jazz Chisholm Jr.","New York Yankees"],
+    ["LIOA-JJ","Josh Jung","Texas Rangers"],
+    ["LIOA-JN","Jhonkensy Noel","Cleveland Guardians"],
+    ["LIOA-JW","James Wood","Washington Nationals"],
+    ["LIOA-KA","Kevin Alcántara","Chicago Cubs"],
+    ["LIOA-KT","Kyle Tucker","Chicago Cubs"],
+    ["LIOA-MC","Miguel Cabrera","Detroit Tigers"],
+    ["LIOA-MM","Manny Machado","San Diego Padres"],
+    ["LIOA-MMC","Mark McGwire","St. Louis Cardinals"],
+    ["LIOA-MO","Marcell Ozuna","Atlanta Braves"],
+    ["LIOA-MOL","Matt Olson","Atlanta Braves"],
+    ["LIOA-MP","Mike Piazza","New York Mets"],
+    ["LIOA-MS","Mike Schmidt","Philadelphia Phillies"],
+    ["LIOA-MT","Mike Trout","Los Angeles Angels"],
+    ["LIOA-PA","Pete Alonso","New York Mets"],
+    ["LIOA-RH","Ryan Howard","Philadelphia Phillies"],
+    ["LIOA-RJ","Reggie Jackson","New York Yankees"],
+    ["LIOA-SO","Shohei Ohtani","Los Angeles Dodgers"],
+    ["LIOA-SS","Sammy Sosa","Chicago Cubs"],
+    ["LIOA-VG","Vladimir Guerrero","Los Angeles Angels"],
+    ["LIOA-YA","Yordan Alvarez","Houston Astros"],
+  ].map(([n,p,t])=>({n,p,t,group:"Autograph",cat:"Launched Into Orbit Autographs",sub:"Auto"})),
+
+  // Stella Nova Autographs
+  ...[
+    ["SNA-AR","Adley Rutschman","Baltimore Orioles"],
+    ["SNA-BL","Brooks Lee","Minnesota Twins"],
+    ["SNA-BW","Bobby Witt Jr.","Kansas City Royals"],
+    ["SNA-CC","Corbin Carroll","Arizona Diamondbacks"],
+    ["SNA-DC","Dylan Crews","Washington Nationals"],
+    ["SNA-EC","Evan Carter","Texas Rangers"],
+    ["SNA-FT","Fernando Tatis Jr.","San Diego Padres"],
+    ["SNA-GH","Gunnar Henderson","Baltimore Orioles"],
+    ["SNA-HK","Hyeseong Kim","Los Angeles Dodgers"],
+    ["SNA-JC","Jackson Chourio","Milwaukee Brewers"],
+    ["SNA-JD","Jasson Domínguez","New York Yankees"],
+    ["SNA-JH","Jackson Holliday","Baltimore Orioles"],
+    ["SNA-JJ","Jackson Jobe","Detroit Tigers"],
+    ["SNA-JR","Julio Rodríguez","Seattle Mariners"],
+    ["SNA-JW","Jacob Wilson","Athletics"],
+    ["SNA-LA","Luis Arraez","San Diego Padres"],
+    ["SNA-PS","Paul Skenes","Pittsburgh Pirates"],
+    ["SNA-TS","Tarik Skubal","Detroit Tigers"],
+    ["SNA-TT","Trea Turner","Philadelphia Phillies"],
+    ["SNA-VG","Vladimir Guerrero Jr.","Toronto Blue Jays"],
+    ["SNA-WL","Wyatt Langford","Texas Rangers"],
+    ["SNA-YY","Yoshinobu Yamamoto","Los Angeles Dodgers"],
+  ].map(([n,p,t])=>({n,p,t,group:"Autograph",cat:"Stella Nova Autographs",sub:"Auto"})),
+
+  // Star Clusters Dual Autographs
+  {n:"SCDA-BD",p:"Johnny Bench / Elly De La Cruz",t:"Cincinnati Reds",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Johnny Bench","Cincinnati Reds"],["Elly De La Cruz","Cincinnati Reds"]]},
+  {n:"SCDA-DC",p:"CC Sabathia / Derek Jeter",t:"New York Yankees",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["CC Sabathia","New York Yankees"],["Derek Jeter","New York Yankees"]]},
+  {n:"SCDA-GI",p:"Ken Griffey Jr. / Ichiro",t:"Seattle Mariners",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Ken Griffey Jr.","Seattle Mariners"],["Ichiro","Seattle Mariners"]]},
+  {n:"SCDA-HR",p:"Julio Rodríguez / Félix Hernández",t:"Seattle Mariners",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Julio Rodríguez","Seattle Mariners"],["Félix Hernández","Seattle Mariners"]]},
+  {n:"SCDA-JA",p:"Chipper Jones / Ronald Acuña Jr.",t:"Atlanta Braves",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Chipper Jones","Atlanta Braves"],["Ronald Acuña Jr.","Atlanta Braves"]]},
+  {n:"SCDA-JC",p:"Randy Johnson / Corbin Carroll",t:"Arizona Diamondbacks",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Randy Johnson","Arizona Diamondbacks"],["Corbin Carroll","Arizona Diamondbacks"]]},
+  {n:"SCDA-JEJ",p:"Aaron Judge / Derek Jeter",t:"New York Yankees",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Aaron Judge","New York Yankees"],["Derek Jeter","New York Yankees"]]},
+  {n:"SCDA-JW",p:"Bo Jackson / Bobby Witt Jr.",t:"Kansas City Royals",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Bo Jackson","Kansas City Royals"],["Bobby Witt Jr.","Kansas City Royals"]]},
+  {n:"SCDA-KO",p:"Shohei Ohtani / Sandy Koufax",t:"Los Angeles Dodgers",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Shohei Ohtani","Los Angeles Dodgers"],["Sandy Koufax","Los Angeles Dodgers"]]},
+  {n:"SCDA-KY",p:"Clayton Kershaw / Yoshinobu Yamamoto",t:"Los Angeles Dodgers",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Clayton Kershaw","Los Angeles Dodgers"],["Yoshinobu Yamamoto","Los Angeles Dodgers"]]},
+  {n:"SCDA-MS",p:"Greg Maddux / Chris Sale",t:"Atlanta Braves",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Greg Maddux","Atlanta Braves"],["Chris Sale","Atlanta Braves"]]},
+  {n:"SCDA-OS",p:"Roki Sasaki / Shohei Ohtani",t:"Los Angeles Dodgers",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Roki Sasaki","Los Angeles Dodgers"],["Shohei Ohtani","Los Angeles Dodgers"]]},
+  {n:"SCDA-PA",p:"Pete Alonso / Mike Piazza",t:"New York Mets",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Pete Alonso","New York Mets"],["Mike Piazza","New York Mets"]]},
+  {n:"SCDA-PC",p:"Will Clark / Buster Posey",t:"San Francisco Giants",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Will Clark","San Francisco Giants"],["Buster Posey","San Francisco Giants"]]},
+  {n:"SCDA-PM",p:"Mark McGwire / Albert Pujols",t:"St. Louis Cardinals",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Mark McGwire","St. Louis Cardinals"],["Albert Pujols","St. Louis Cardinals"]]},
+  {n:"SCDA-RH",p:"Cal Ripken Jr. / Gunnar Henderson",t:"Baltimore Orioles",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Cal Ripken Jr.","Baltimore Orioles"],["Gunnar Henderson","Baltimore Orioles"]]},
+  {n:"SCDA-SA",p:"Kevin Alcántara / Ryne Sandberg",t:"Chicago Cubs",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Kevin Alcántara","Chicago Cubs"],["Ryne Sandberg","Chicago Cubs"]]},
+  {n:"SCDA-SC",p:"Mike Schmidt / Steve Carlton",t:"Philadelphia Phillies",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Mike Schmidt","Philadelphia Phillies"],["Steve Carlton","Philadelphia Phillies"]]},
+  {n:"SCDA-WC",p:"James Wood / Dylan Crews",t:"Washington Nationals",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["James Wood","Washington Nationals"],["Dylan Crews","Washington Nationals"]]},
+  {n:"SCDA-YS",p:"Yoshinobu Yamamoto / Roki Sasaki",t:"Los Angeles Dodgers",group:"Autograph",cat:"Star Clusters Dual Auto",sub:"Auto/Multi",
+   players:[["Yoshinobu Yamamoto","Los Angeles Dodgers"],["Roki Sasaki","Los Angeles Dodgers"]]},
+
+  // Insert: Light Speed
+  ...[
+    ["LS-1","Bobby Witt Jr.","Kansas City Royals"],["LS-2","Elly De La Cruz","Cincinnati Reds"],
+    ["LS-3","Pete Crow-Armstrong","Chicago Cubs"],["LS-4","Wyatt Langford","Texas Rangers"],
+    ["LS-5","James Wood","Washington Nationals"],["LS-6","Jackson Chourio","Milwaukee Brewers"],
+    ["LS-7","Ronald Acuña Jr.","Atlanta Braves"],["LS-8","Trea Turner","Philadelphia Phillies"],
+    ["LS-9","Julio Rodríguez","Seattle Mariners"],["LS-10","Luisangel Acuña","New York Mets"],
+    ["LS-11","Jackson Holliday","Baltimore Orioles"],["LS-12","Marcelo Mayer","Boston Red Sox"],
+    ["LS-13","Dylan Crews","Washington Nationals"],["LS-14","Mike Trout","Los Angeles Angels"],
+    ["LS-15","Shohei Ohtani","Los Angeles Dodgers"],["LS-16","José Ramírez","Cleveland Guardians"],
+    ["LS-17","Jazz Chisholm Jr.","New York Yankees"],["LS-18","Corbin Carroll","Arizona Diamondbacks"],
+    ["LS-19","Francisco Lindor","New York Mets"],["LS-20","Ichiro","Seattle Mariners"],
+    ["LS-21","Rickey Henderson","Athletics"],["LS-22","Lou Brock","St. Louis Cardinals"],
+    ["LS-23","Bo Jackson","Kansas City Royals"],["LS-24","Chandler Simpson","Tampa Bay Rays"],
+    ["LS-25","Kristian Campbell","Boston Red Sox"],
+  ].map(([n,p,t])=>({n,p,t,group:"Insert",cat:"Light Speed",sub:null})),
+
+  // Insert: Ultraviolet Beam
+  ...[
+    ["UB-1","James Wood","Washington Nationals"],["UB-2","Dylan Crews","Washington Nationals"],
+    ["UB-3","Coby Mayo","Baltimore Orioles"],["UB-4","Brooks Lee","Minnesota Twins"],
+    ["UB-5","Nick Kurtz","Athletics"],["UB-6","Roki Sasaki","Los Angeles Dodgers"],
+    ["UB-7","Jace Jung","Detroit Tigers"],["UB-8","Jackson Jobe","Detroit Tigers"],
+    ["UB-9","Jacob Wilson","Athletics"],["UB-10","Marcelo Mayer","Boston Red Sox"],
+    ["UB-11","Cade Horton","Chicago Cubs"],["UB-12","Ben Rice","New York Yankees"],
+    ["UB-13","Luisangel Acuña","New York Mets"],["UB-14","Yoshinobu Yamamoto","Los Angeles Dodgers"],
+    ["UB-15","Elly De La Cruz","Cincinnati Reds"],["UB-16","Jasson Domínguez","New York Yankees"],
+    ["UB-17","Jackson Holliday","Baltimore Orioles"],["UB-18","Jackson Chourio","Milwaukee Brewers"],
+    ["UB-19","Jackson Merrill","San Diego Padres"],["UB-20","Paul Skenes","Pittsburgh Pirates"],
+    ["UB-21","Matt Shaw","Chicago Cubs"],["UB-22","Kristian Campbell","Boston Red Sox"],
+    ["UB-23","Drake Baldwin","Atlanta Braves"],["UB-24","Cam Smith","Houston Astros"],
+    ["UB-25","Chase Dollander","Colorado Rockies"],
+  ].map(([n,p,t])=>({n,p,t,group:"Insert",cat:"Ultraviolet Beam",sub:null})),
+
+  // Insert: Dual Star Clusters
+  {n:"DSC-1",p:"Derek Jeter / Aaron Judge",t:"New York Yankees",group:"Insert",cat:"Dual Star Clusters",sub:null,
+   players:[["Derek Jeter","New York Yankees"],["Aaron Judge","New York Yankees"]]},
+  {n:"DSC-2",p:"Ichiro / Ken Griffey Jr.",t:"Seattle Mariners",group:"Insert",cat:"Dual Star Clusters",sub:null,
+   players:[["Ichiro","Seattle Mariners"],["Ken Griffey Jr.","Seattle Mariners"]]},
+  {n:"DSC-3",p:"Juan Soto / Francisco Lindor",t:"New York Mets",group:"Insert",cat:"Dual Star Clusters",sub:null,
+   players:[["Juan Soto","New York Mets"],["Francisco Lindor","New York Mets"]]},
+  {n:"DSC-4",p:"Mookie Betts / Shohei Ohtani",t:"Los Angeles Dodgers",group:"Insert",cat:"Dual Star Clusters",sub:null,
+   players:[["Mookie Betts","Los Angeles Dodgers"],["Shohei Ohtani","Los Angeles Dodgers"]]},
+  {n:"DSC-5",p:"Kristian Campbell / Marcelo Mayer",t:"Boston Red Sox",group:"Insert",cat:"Dual Star Clusters",sub:null,
+   players:[["Kristian Campbell","Boston Red Sox"],["Marcelo Mayer","Boston Red Sox"]]},
+  {n:"DSC-6",p:"Nick Kurtz / Jacob Wilson",t:"Athletics",group:"Insert",cat:"Dual Star Clusters",sub:null,
+   players:[["Nick Kurtz","Athletics"],["Jacob Wilson","Athletics"]]},
+  {n:"DSC-7",p:"Pete Crow-Armstrong / Kyle Tucker",t:"Chicago Cubs",group:"Insert",cat:"Dual Star Clusters",sub:null,
+   players:[["Pete Crow-Armstrong","Chicago Cubs"],["Kyle Tucker","Chicago Cubs"]]},
+  {n:"DSC-8",p:"James Wood / Dylan Crews",t:"Washington Nationals",group:"Insert",cat:"Dual Star Clusters",sub:null,
+   players:[["James Wood","Washington Nationals"],["Dylan Crews","Washington Nationals"]]},
+
+  // Insert: Triple Star Clusters
+  {n:"TSC-1",p:"Shohei Ohtani / Roki Sasaki / Yoshinobu Yamamoto",t:"Los Angeles Dodgers",group:"Insert",cat:"Triple Star Clusters",sub:null,
+   players:[["Shohei Ohtani","Los Angeles Dodgers"],["Roki Sasaki","Los Angeles Dodgers"],["Yoshinobu Yamamoto","Los Angeles Dodgers"]]},
+  {n:"TSC-2",p:"Mickey Mantle / Aaron Judge / Babe Ruth",t:"New York Yankees",group:"Insert",cat:"Triple Star Clusters",sub:null,
+   players:[["Mickey Mantle","New York Yankees"],["Aaron Judge","New York Yankees"],["Babe Ruth","New York Yankees"]]},
+  {n:"TSC-3",p:"Ken Griffey Jr. / Ichiro / Julio Rodríguez",t:"Seattle Mariners",group:"Insert",cat:"Triple Star Clusters",sub:null,
+   players:[["Ken Griffey Jr.","Seattle Mariners"],["Ichiro","Seattle Mariners"],["Julio Rodríguez","Seattle Mariners"]]},
+  {n:"TSC-4",p:"Elly De La Cruz / Johnny Bench / Barry Larkin",t:"Cincinnati Reds",group:"Insert",cat:"Triple Star Clusters",sub:null,
+   players:[["Elly De La Cruz","Cincinnati Reds"],["Johnny Bench","Cincinnati Reds"],["Barry Larkin","Cincinnati Reds"]]},
+  {n:"TSC-5",p:"Manny Machado / Fernando Tatis Jr. / Jackson Merrill",t:"San Diego Padres",group:"Insert",cat:"Triple Star Clusters",sub:null,
+   players:[["Manny Machado","San Diego Padres"],["Fernando Tatis Jr.","San Diego Padres"],["Jackson Merrill","San Diego Padres"]]},
+  {n:"TSC-6",p:"Babe Ruth / Willie Mays / Hank Aaron",t:"New York Yankees",group:"Insert",cat:"Triple Star Clusters",sub:null,
+   players:[["Babe Ruth","New York Yankees"],["Willie Mays","San Francisco Giants"],["Hank Aaron","Atlanta Braves"]]},
+  {n:"TSC-7",p:"Ronald Acuña Jr. / Chipper Jones / Hank Aaron",t:"Atlanta Braves",group:"Insert",cat:"Triple Star Clusters",sub:null,
+   players:[["Ronald Acuña Jr.","Atlanta Braves"],["Chipper Jones","Atlanta Braves"],["Hank Aaron","Atlanta Braves"]]},
+
+  // Insert: Extraterrestrial Talent
+  ...[
+    ["ET-1","Aaron Judge","New York Yankees"],["ET-2","Shohei Ohtani","Los Angeles Dodgers"],
+    ["ET-3","Bobby Witt Jr.","Kansas City Royals"],["ET-4","Elly De La Cruz","Cincinnati Reds"],
+    ["ET-5","José Ramírez","Cleveland Guardians"],["ET-6","Gunnar Henderson","Baltimore Orioles"],
+    ["ET-7","Mookie Betts","Los Angeles Dodgers"],["ET-8","Kyle Tucker","Chicago Cubs"],
+    ["ET-9","Corbin Carroll","Arizona Diamondbacks"],["ET-10","Juan Soto","New York Mets"],
+    ["ET-11","Fernando Tatis Jr.","San Diego Padres"],["ET-12","Julio Rodríguez","Seattle Mariners"],
+    ["ET-13","Vladimir Guerrero Jr.","Toronto Blue Jays"],["ET-14","Francisco Lindor","New York Mets"],
+    ["ET-15","Bryce Harper","Philadelphia Phillies"],["ET-16","Paul Skenes","Pittsburgh Pirates"],
+    ["ET-17","Ronald Acuña Jr.","Atlanta Braves"],["ET-18","Mike Trout","Los Angeles Angels"],
+    ["ET-19","Jackson Chourio","Milwaukee Brewers"],["ET-20","Tarik Skubal","Detroit Tigers"],
+    ["ET-21","Jackson Merrill","San Diego Padres"],["ET-22","Corey Seager","Texas Rangers"],
+    ["ET-23","Roki Sasaki","Los Angeles Dodgers"],["ET-24","James Wood","Washington Nationals"],
+    ["ET-25","Dylan Crews","Washington Nationals"],["ET-26","Nick Kurtz","Athletics"],
+    ["ET-27","Coby Mayo","Baltimore Orioles"],["ET-28","Jacob Wilson","Athletics"],
+    ["ET-29","Jackson Jobe","Detroit Tigers"],["ET-30","Cade Horton","Chicago Cubs"],
+    ["ET-31","Luisangel Acuña","New York Mets"],["ET-32","Matt Shaw","Chicago Cubs"],
+    ["ET-33","Kristian Campbell","Boston Red Sox"],["ET-34","Cam Smith","Houston Astros"],
+    ["ET-35","Marcelo Mayer","Boston Red Sox"],
+  ].map(([n,p,t])=>({n,p,t,group:"Insert",cat:"Extraterrestrial Talent",sub:null})),
+
+  // Insert: Launched Into Orbit
+  ...[
+    ["LIO-1","Albert Pujols","St. Louis Cardinals"],["LIO-2","Shohei Ohtani","Los Angeles Dodgers"],
+    ["LIO-3","Aaron Judge","New York Yankees"],["LIO-4","Mark McGwire","St. Louis Cardinals"],
+    ["LIO-5","Ken Griffey Jr.","Seattle Mariners"],["LIO-6","Ted Williams","Boston Red Sox"],
+    ["LIO-7","Fernando Tatis Jr.","San Diego Padres"],["LIO-8","Alex Rodriguez","New York Yankees"],
+    ["LIO-9","Mike Piazza","New York Mets"],["LIO-10","Bryce Harper","Philadelphia Phillies"],
+    ["LIO-11","Juan Soto","New York Mets"],["LIO-12","David Ortiz","Boston Red Sox"],
+    ["LIO-13","Jasson Domínguez","New York Yankees"],["LIO-14","Reggie Jackson","Athletics"],
+    ["LIO-15","Chipper Jones","Atlanta Braves"],["LIO-16","Mike Schmidt","Philadelphia Phillies"],
+    ["LIO-17","Cal Ripken Jr.","Baltimore Orioles"],["LIO-18","Mickey Mantle","New York Yankees"],
+    ["LIO-19","Sammy Sosa","Chicago Cubs"],["LIO-20","Manny Machado","San Diego Padres"],
+    ["LIO-21","Elly De La Cruz","Cincinnati Reds"],["LIO-22","Adrian Beltré","Texas Rangers"],
+    ["LIO-23","Vladimir Guerrero","Los Angeles Angels"],["LIO-24","Pete Alonso","New York Mets"],
+    ["LIO-25","Cal Raleigh","Seattle Mariners"],["LIO-26","Vladimir Guerrero Jr.","Toronto Blue Jays"],
+    ["LIO-27","Ketel Marte","Arizona Diamondbacks"],["LIO-28","Alex Bregman","Boston Red Sox"],
+    ["LIO-29","Pete Crow-Armstrong","Chicago Cubs"],["LIO-30","Corey Seager","Texas Rangers"],
+    ["LIO-31","Coby Mayo","Baltimore Orioles"],["LIO-32","James Wood","Washington Nationals"],
+    ["LIO-33","Dylan Crews","Washington Nationals"],["LIO-34","Seiya Suzuki","Chicago Cubs"],
+    ["LIO-35","Yordan Alvarez","Houston Astros"],["LIO-36","Kyle Tucker","Chicago Cubs"],
+    ["LIO-37","Mike Trout","Los Angeles Angels"],["LIO-38","Miguel Cabrera","Detroit Tigers"],
+    ["LIO-39","Freddie Freeman","Los Angeles Dodgers"],["LIO-40","Hank Aaron","Atlanta Braves"],
+    ["LIO-41","Babe Ruth","New York Yankees"],["LIO-42","Giancarlo Stanton","New York Yankees"],
+    ["LIO-43","Frank Thomas","Chicago White Sox"],["LIO-44","Gunnar Henderson","Baltimore Orioles"],
+    ["LIO-45","Nick Kurtz","Athletics"],["LIO-46","Salvador Perez","Kansas City Royals"],
+    ["LIO-47","Mookie Betts","Los Angeles Dodgers"],["LIO-48","Francisco Lindor","New York Mets"],
+    ["LIO-49","Andrew McCutchen","Pittsburgh Pirates"],["LIO-50","Kristian Campbell","Boston Red Sox"],
+  ].map(([n,p,t])=>({n,p,t,group:"Insert",cat:"Launched Into Orbit",sub:null})),
+
+  // Insert: Stars In The Night
+  ...[
+    ["STN-1","Jacob Wilson","Athletics"],["STN-2","Marcelo Mayer","Boston Red Sox"],
+    ["STN-3","Roki Sasaki","Los Angeles Dodgers"],["STN-4","James Wood","Washington Nationals"],
+    ["STN-5","Dylan Crews","Washington Nationals"],["STN-6","Coby Mayo","Baltimore Orioles"],
+    ["STN-7","Brooks Lee","Minnesota Twins"],["STN-8","Jace Jung","Detroit Tigers"],
+    ["STN-9","Hyeseong Kim","Los Angeles Dodgers"],["STN-10","Drake Baldwin","Atlanta Braves"],
+    ["STN-11","Connor Norby","Miami Marlins"],["STN-12","Kumar Rocker","Texas Rangers"],
+    ["STN-13","Vladimir Guerrero Jr.","Toronto Blue Jays"],["STN-14","Shohei Ohtani","Los Angeles Dodgers"],
+    ["STN-15","Kyle Tucker","Chicago Cubs"],["STN-16","Fernando Tatis Jr.","San Diego Padres"],
+    ["STN-17","Jackson Merrill","San Diego Padres"],["STN-18","Mike Trout","Los Angeles Angels"],
+    ["STN-19","Bobby Witt Jr.","Kansas City Royals"],["STN-20","Juan Soto","New York Mets"],
+    ["STN-21","Aaron Judge","New York Yankees"],["STN-22","Bryce Harper","Philadelphia Phillies"],
+    ["STN-23","Matt Shaw","Chicago Cubs"],["STN-24","Kristian Campbell","Boston Red Sox"],
+    ["STN-25","Cam Smith","Houston Astros"],
+  ].map(([n,p,t])=>({n,p,t,group:"Insert",cat:"Stars In The Night",sub:null})),
+
+  // Insert: Stella Nova
+  ...[
+    ["SN-1","Jackson Chourio","Milwaukee Brewers"],["SN-2","Jackson Merrill","San Diego Padres"],
+    ["SN-3","Elly De La Cruz","Cincinnati Reds"],["SN-4","Gunnar Henderson","Baltimore Orioles"],
+    ["SN-5","Bobby Witt Jr.","Kansas City Royals"],["SN-6","Juan Soto","New York Mets"],
+    ["SN-7","Ronald Acuña Jr.","Atlanta Braves"],["SN-8","Julio Rodríguez","Seattle Mariners"],
+    ["SN-9","Paul Skenes","Pittsburgh Pirates"],["SN-10","James Wood","Washington Nationals"],
+    ["SN-11","Dylan Crews","Washington Nationals"],["SN-12","Roki Sasaki","Los Angeles Dodgers"],
+    ["SN-13","Coby Mayo","Baltimore Orioles"],["SN-14","Luisangel Acuña","New York Mets"],
+    ["SN-15","Brooks Lee","Minnesota Twins"],["SN-16","Marcelo Mayer","Boston Red Sox"],
+    ["SN-17","Jackson Jobe","Detroit Tigers"],["SN-18","Nick Kurtz","Athletics"],
+    ["SN-19","Jacob Wilson","Athletics"],["SN-20","Matt Shaw","Chicago Cubs"],
+    ["SN-21","Kristian Campbell","Boston Red Sox"],["SN-22","Dalton Rushing","Los Angeles Dodgers"],
+    ["SN-23","Cam Smith","Houston Astros"],["SN-24","Chase Dollander","Colorado Rockies"],
+    ["SN-25","Edgar Quero","Chicago White Sox"],
+  ].map(([n,p,t])=>({n,p,t,group:"Insert",cat:"Stella Nova",sub:null})),
+
+  // Insert: Planetarium
+  ...[
+    ["P-1","Aaron Judge","New York Yankees"],["P-2","Shohei Ohtani","Los Angeles Dodgers"],
+    ["P-3","Mookie Betts","Los Angeles Dodgers"],["P-4","Bryce Harper","Philadelphia Phillies"],
+    ["P-5","Pete Alonso","New York Mets"],["P-6","Manny Machado","San Diego Padres"],
+    ["P-7","Marcelo Mayer","Boston Red Sox"],["P-8","Shota Imanaga","Chicago Cubs"],
+    ["P-9","Francisco Lindor","New York Mets"],["P-10","Bobby Witt Jr.","Kansas City Royals"],
+    ["P-11","Andrew McCutchen","Pittsburgh Pirates"],["P-12","Drake Baldwin","Atlanta Braves"],
+    ["P-13","Mike Trout","Los Angeles Angels"],["P-14","José Ramírez","Cleveland Guardians"],
+    ["P-15","Roki Sasaki","Los Angeles Dodgers"],["P-16","Dylan Crews","Washington Nationals"],
+    ["P-17","Coby Mayo","Baltimore Orioles"],["P-18","Ben Rice","New York Yankees"],
+    ["P-19","Jacob Wilson","Athletics"],["P-20","Luisangel Acuña","New York Mets"],
+    ["P-21","James Wood","Washington Nationals"],["P-22","Dalton Rushing","Los Angeles Dodgers"],
+    ["P-23","Matt Shaw","Chicago Cubs"],["P-24","Kristian Campbell","Boston Red Sox"],
+    ["P-25","Cam Smith","Houston Astros"],
+  ].map(([n,p,t])=>({n,p,t,group:"Insert",cat:"Planetarium",sub:null})),
+
+  // Insert: Supernova
+  ...[
+    ["S-1","Shohei Ohtani","Los Angeles Dodgers"],["S-2","Aaron Judge","New York Yankees"],
+    ["S-3","Elly De La Cruz","Cincinnati Reds"],["S-4","Kyle Tucker","Chicago Cubs"],
+    ["S-5","Paul Skenes","Pittsburgh Pirates"],["S-6","Corey Seager","Texas Rangers"],
+    ["S-7","Gunnar Henderson","Baltimore Orioles"],["S-8","Bobby Witt Jr.","Kansas City Royals"],
+    ["S-9","Bryce Harper","Philadelphia Phillies"],["S-10","Clayton Kershaw","Los Angeles Dodgers"],
+    ["S-11","Juan Soto","New York Mets"],["S-12","Yordan Alvarez","Houston Astros"],
+    ["S-13","Jackson Chourio","Milwaukee Brewers"],["S-14","Ronald Acuña Jr.","Atlanta Braves"],
+    ["S-15","James Wood","Washington Nationals"],["S-16","Dylan Crews","Washington Nationals"],
+    ["S-17","Roki Sasaki","Los Angeles Dodgers"],["S-18","Jacob Wilson","Athletics"],
+    ["S-19","Nick Kurtz","Athletics"],["S-20","Jackson Jobe","Detroit Tigers"],
+    ["S-21","Rhett Lowder","Cincinnati Reds"],["S-22","Marcelo Mayer","Boston Red Sox"],
+    ["S-23","Matt Shaw","Chicago Cubs"],["S-24","Kristian Campbell","Boston Red Sox"],
+    ["S-25","Cam Smith","Houston Astros"],
+  ].map(([n,p,t])=>({n,p,t,group:"Insert",cat:"Supernova",sub:null})),
+
+  // Insert: Starfractor (100 cards)
+  ...[
+    ["SF-1","Jackson Chourio","Milwaukee Brewers"],["SF-2","Jackson Holliday","Baltimore Orioles"],
+    ["SF-3","Wyatt Langford","Texas Rangers"],["SF-4","José Ramírez","Cleveland Guardians"],
+    ["SF-5","Freddie Freeman","Los Angeles Dodgers"],["SF-6","Gunnar Henderson","Baltimore Orioles"],
+    ["SF-7","Bryce Harper","Philadelphia Phillies"],["SF-8","Kyle Tucker","Chicago Cubs"],
+    ["SF-9","Francisco Lindor","New York Mets"],["SF-10","Corbin Carroll","Arizona Diamondbacks"],
+    ["SF-11","Trea Turner","Philadelphia Phillies"],["SF-12","Jose Altuve","Houston Astros"],
+    ["SF-13","Bobby Witt Jr.","Kansas City Royals"],["SF-14","Shohei Ohtani","Los Angeles Dodgers"],
+    ["SF-15","Aaron Judge","New York Yankees"],["SF-16","Elly De La Cruz","Cincinnati Reds"],
+    ["SF-17","Juan Soto","New York Mets"],["SF-18","Mookie Betts","Los Angeles Dodgers"],
+    ["SF-19","Fernando Tatis Jr.","San Diego Padres"],["SF-20","Vladimir Guerrero Jr.","Toronto Blue Jays"],
+    ["SF-21","Yordan Alvarez","Houston Astros"],["SF-22","Julio Rodríguez","Seattle Mariners"],
+    ["SF-23","Tarik Skubal","Detroit Tigers"],["SF-24","Riley Greene","Detroit Tigers"],
+    ["SF-25","Paul Skenes","Pittsburgh Pirates"],["SF-26","Dalton Rushing","Los Angeles Dodgers"],
+    ["SF-27","Zack Wheeler","Philadelphia Phillies"],["SF-28","Clayton Kershaw","Los Angeles Dodgers"],
+    ["SF-29","Jackson Merrill","San Diego Padres"],["SF-30","Jazz Chisholm Jr.","New York Yankees"],
+    ["SF-31","Ketel Marte","Arizona Diamondbacks"],["SF-32","Ronald Acuña Jr.","Atlanta Braves"],
+    ["SF-33","Austin Riley","Atlanta Braves"],["SF-34","Rafael Devers","San Francisco Giants"],
+    ["SF-35","Alex Bregman","Boston Red Sox"],["SF-36","Nolan Arenado","St. Louis Cardinals"],
+    ["SF-37","Manny Machado","San Diego Padres"],["SF-38","Cal Raleigh","Seattle Mariners"],
+    ["SF-39","Cody Bellinger","New York Yankees"],["SF-40","Corey Seager","Texas Rangers"],
+    ["SF-41","Evan Carter","Texas Rangers"],["SF-42","Chris Sale","Atlanta Braves"],
+    ["SF-43","Pete Alonso","New York Mets"],["SF-44","Ozzie Albies","Atlanta Braves"],
+    ["SF-45","William Contreras","Milwaukee Brewers"],["SF-46","Christian Yelich","Milwaukee Brewers"],
+    ["SF-47","Masyn Winn","St. Louis Cardinals"],["SF-48","Bo Bichette","Toronto Blue Jays"],
+    ["SF-49","Mike Trout","Los Angeles Angels"],["SF-50","Kyle Schwarber","Philadelphia Phillies"],
+    ["SF-51","Salvador Perez","Kansas City Royals"],["SF-52","Yoshinobu Yamamoto","Los Angeles Dodgers"],
+    ["SF-53","Brent Rooker","Athletics"],["SF-54","Lawrence Butler","Athletics"],
+    ["SF-55","Oneil Cruz","Pittsburgh Pirates"],["SF-56","Hunter Greene","Cincinnati Reds"],
+    ["SF-57","Shota Imanaga","Chicago Cubs"],["SF-58","Byron Buxton","Minnesota Twins"],
+    ["SF-59","Aaron Nola","Philadelphia Phillies"],["SF-60","Adley Rutschman","Baltimore Orioles"],
+    ["SF-61","Junior Caminero","Tampa Bay Rays"],["SF-62","Willy Adames","San Francisco Giants"],
+    ["SF-63","Luis Robert Jr.","Chicago White Sox"],["SF-64","Seiya Suzuki","Chicago Cubs"],
+    ["SF-65","Roki Sasaki","Los Angeles Dodgers"],["SF-66","James Wood","Washington Nationals"],
+    ["SF-67","Dylan Crews","Washington Nationals"],["SF-68","Jacob Wilson","Athletics"],
+    ["SF-69","Coby Mayo","Baltimore Orioles"],["SF-70","Brooks Lee","Minnesota Twins"],
+    ["SF-71","Hyeseong Kim","Los Angeles Dodgers"],["SF-72","Jace Jung","Detroit Tigers"],
+    ["SF-73","Jackson Jobe","Detroit Tigers"],["SF-74","Kevin Alcántara","Chicago Cubs"],
+    ["SF-75","Rhett Lowder","Cincinnati Reds"],["SF-76","Luisangel Acuña","New York Mets"],
+    ["SF-77","Kumar Rocker","Texas Rangers"],["SF-78","Adael Amador","Colorado Rockies"],
+    ["SF-79","Angel Martínez","Cleveland Guardians"],["SF-80","Ben Rice","New York Yankees"],
+    ["SF-81","Connor Norby","Miami Marlins"],["SF-82","Agustín Ramírez","Miami Marlins"],
+    ["SF-83","Rece Hinds","Cincinnati Reds"],["SF-84","Thomas Saggese","St. Louis Cardinals"],
+    ["SF-85","Edgar Quero","Chicago White Sox"],["SF-86","Marcelo Mayer","Boston Red Sox"],
+    ["SF-87","Orelvis Martinez","Toronto Blue Jays"],["SF-88","Spencer Schwellenbach","Atlanta Braves"],
+    ["SF-89","Tomoyuki Sugano","Baltimore Orioles"],["SF-90","Caden Dana","Los Angeles Angels"],
+    ["SF-91","Cade Horton","Chicago Cubs"],["SF-92","Jung Hoo Lee","San Francisco Giants"],
+    ["SF-93","Nick Kurtz","Athletics"],["SF-94","Spencer Torkelson","Detroit Tigers"],
+    ["SF-95","Matt Shaw","Chicago Cubs"],["SF-96","Kristian Campbell","Boston Red Sox"],
+    ["SF-97","Drake Baldwin","Atlanta Braves"],["SF-98","Cam Smith","Houston Astros"],
+    ["SF-99","Moisés Ballesteros","Chicago Cubs"],["SF-100","Chase Dollander","Colorado Rockies"],
+  ].map(([n,p,t])=>({n,p,t,group:"Insert",cat:"Starfractor",sub:null})),
+
+  // Insert: Planetary Pursuit (10 cards per planet prefix = 100 total)
+  ...["PPE","PPJ","PPM","PPMA","PPN","PPP","PPS","PPST","PPU","PPV"].flatMap(prefix =>
+    [
+      [1,"Aaron Judge","New York Yankees"],[2,"Shohei Ohtani","Los Angeles Dodgers"],
+      [3,"Ronald Acuña Jr.","Atlanta Braves"],[4,"Francisco Lindor","New York Mets"],
+      [5,"Vladimir Guerrero Jr.","Toronto Blue Jays"],[6,"Roki Sasaki","Los Angeles Dodgers"],
+      [7,"James Wood","Washington Nationals"],[8,"Dylan Crews","Washington Nationals"],
+      [9,"Pete Crow-Armstrong","Chicago Cubs"],[10,"Marcelo Mayer","Boston Red Sox"],
+    ].map(([num,p,t])=>({n:`${prefix}-${num}`,p,t,group:"Insert",cat:"Planetary Pursuit",sub:null}))
+  ),
+];
+
+// ============================================================
+// DERIVED LOOKUPS
+// ============================================================
+const RC_PLAYERS = new Set(
+  ALL_DATA.filter(d=>d.group==="Base"&&d.sub==="RC").map(d=>d.p)
+);
+function isRC(name){return RC_PLAYERS.has(name);}
+
+const PLAYER_TEAM = {};
+ALL_DATA.forEach(d=>{
+  const names=d.p.split(' / ').map(s=>s.trim()).filter(Boolean);
+  if(names.length===1) PLAYER_TEAM[names[0]]=d.realTeam||d.t;
+});
+
+function splitPlayers(p){return p.split(' / ').map(s=>s.trim()).filter(Boolean);}
+
+function getCardPlayers(card){
+  if(card.players) return card.players.map(([name,team])=>({name,team}));
+  const names=card.p.split(' / ').map(s=>s.trim()).filter(Boolean);
+  if(names.length===1){
+    const entry={name:names[0],team:card.t};
+    if(card.realTeam) entry.realTeam=card.realTeam;
+    return [entry];
+  }
+  return names.map(name=>({name,team:PLAYER_TEAM[name]||card.t}));
+}
+
+const GROUP_ORDER=["Base","Insert","Autograph"];
+const GROUPS={};
+GROUP_ORDER.forEach(g=>{GROUPS[g]=[...new Set(ALL_DATA.filter(d=>d.group===g).map(d=>d.cat))];});
+
+const HISTORICAL=new Set(["Oakland Athletics","California Angels","Angels"]);
+const FG_LABELS=new Set(["National League","American League"]);
+const MLB_TEAMS=new Set(Object.keys(TEAM_COLORS).filter(t=>!HISTORICAL.has(t)&&!FG_LABELS.has(t)));
+const ALL_TEAMS=[...new Set(ALL_DATA.map(d=>d.t).filter(t=>MLB_TEAMS.has(t)))].sort();
+const ALL_SUBTYPES=[...new Set(ALL_DATA.map(d=>d.sub).filter(Boolean))].filter(s=>s!=="RC"&&s!=="Rookie").sort();
+
+const GROUP_COLORS={"Base":"#6366f1","Insert":"#f59e0b","Autograph":"#10b981"};
+
+// ============================================================
+// STATE
+// ============================================================
+let state={
+  search:"",
+  composing:false,  // NEW: track IME composition state
+  groupFilter:"All",
+  subCatFilter:"All",
+  teamFilter:"All",
+  subFilter:"All",
+  sortBy:"number",
+  view:"list",
+  modalPlayer:null,
+  isMobile:window.innerWidth<640,
+  statsExpanded:{},
+  statsShowAll:{},
+  rcFilter:"All",
+  collected:{},
+};
+
+window.addEventListener('resize',()=>{state.isMobile=window.innerWidth<640;render();});
+
+// ============================================================
+// HELPERS
+// ============================================================
+function teamBadgeHTML(team){
+  const color=getTeamColor(team),abbr=getTeamAbbr(team);
+  return `<span style="display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
+    <span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;padding:0 5px;border-radius:5px;background:${color};color:#fff;font-size:10px;font-weight:800;letter-spacing:0.5px;line-height:1;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.15);text-shadow:0 1px 1px rgba(0,0,0,0.3)">${abbr}</span>
+    <span style="font-size:12px;color:#94a3b8">${team.length>22?team.slice(0,20)+'…':team}</span>
+  </span>`;
+}
+function teamAbbrChip(team){
+  const color=getTeamColor(team),abbr=getTeamAbbr(team);
+  return `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;padding:0 5px;border-radius:5px;background:${color};color:#fff;font-size:10px;font-weight:800;letter-spacing:0.5px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.25),inset 0 1px 0 rgba(255,255,255,0.15);text-shadow:0 1px 1px rgba(0,0,0,0.3)">${abbr}</span>`;
+}
+function cardTeamBadgesHTML(card){
+  const players=getCardPlayers(card),seen=new Set(),badges=[];
+  players.forEach(({team})=>{if(!seen.has(team)){seen.add(team);badges.push(teamBadgeHTML(team));}});
+  if(badges.length<=1) return `<span style="display:inline-flex;gap:4px">${badges.join("")}</span>`;
+  return `<span style="display:inline-flex;flex-direction:column;gap:3px">${badges.join("")}</span>`;
+}
+function badgeHTML(text){
+  const colors={
+    "RC":{bg:"#fef3c7",color:"#92400e",border:"#fcd34d"},
+    "Auto":{bg:"rgba(16,185,129,0.15)",color:"#34d399",border:"rgba(16,185,129,0.3)"},
+    "Auto/Multi":{bg:"rgba(99,102,241,0.15)",color:"#818cf8",border:"rgba(99,102,241,0.3)"},
+    "Auto/SP":{bg:"rgba(236,72,153,0.15)",color:"#f472b6",border:"rgba(236,72,153,0.3)"},
+  };
+  const c=colors[text]||{bg:"rgba(255,255,255,0.08)",color:"#94a3b8",border:"rgba(255,255,255,0.12)"};
+  return `<span style="padding:2px 8px;border-radius:999px;background:${c.bg};color:${c.color};border:1px solid ${c.border};font-size:10px;font-weight:700;white-space:nowrap">${text}</span>`;
+}
+function catBadgeHTML(cat,group){
+  const color=GROUP_COLORS[group]||"#6366f1";
+  return `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${color}18;color:${color};font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;display:inline-block" title="${cat}">${cat.length>14?cat.slice(0,13)+'…':cat}</span>`;
+}
+
+// ============================================================
+// FILTERING
+// ============================================================
+function getFiltered(){
+  let items=ALL_DATA;
+  if(state.groupFilter!=="All") items=items.filter(d=>d.group===state.groupFilter);
+  if(state.subCatFilter!=="All") items=items.filter(d=>d.cat===state.subCatFilter);
+  if(state.teamFilter!=="All") items=items.filter(d=>getCardPlayers(d).some(({team})=>team===state.teamFilter));
+  if(state.subFilter!=="All") items=items.filter(d=>d.sub===state.subFilter);
+  if(state.rcFilter==="RC") items=items.filter(d=>splitPlayers(d.p).some(n=>isRC(n)));
+  if(state.rcFilter==="Non-RC") items=items.filter(d=>!splitPlayers(d.p).some(n=>isRC(n)));
+  if(state.search.trim()){
+    const q=state.search.toLowerCase();
+    items=items.filter(d=>
+      d.p.toLowerCase().includes(q)||
+      getCardPlayers(d).some(({team})=>team.toLowerCase().includes(q))||
+      String(d.n).toLowerCase().includes(q)
+    );
+  }
+  if(state.sortBy==="number"){
+    const pc=n=>{const m=String(n).match(/^([A-Za-z\-]*)(\d+)(.*)$/);return m?{prefix:m[1].toUpperCase(),num:parseInt(m[2]),suffix:m[3]}:{prefix:String(n).toUpperCase(),num:0,suffix:''};};
+    items=[...items].sort((a,b)=>{const pa=pc(a.n),pb=pc(b.n);if(pa.prefix!==pb.prefix)return pa.prefix.localeCompare(pb.prefix);if(pa.num!==pb.num)return pa.num-pb.num;return pa.suffix.localeCompare(pb.suffix);});
+  } else if(state.sortBy==="player") items=[...items].sort((a,b)=>a.p.localeCompare(b.p));
+  else if(state.sortBy==="team") items=[...items].sort((a,b)=>a.t.localeCompare(b.t));
+  return items;
+}
+
+// ============================================================
+// RENDER COMPONENTS
+// ============================================================
+function renderExpandedCards(cards,accentColor){
+  if(!cards.length) return '';
+  return `<div style="margin-left:22px;margin-top:4px;margin-bottom:8px;border-left:2px solid #e2e8f0;padding-left:10px">
+    ${cards.map((c,i)=>{
+      const teams=[...new Set(getCardPlayers(c).map(pl=>pl.realTeam||pl.team))];
+      return `<div style="padding:5px 6px;font-size:12px;border-radius:4px;background:${i%2===0?'rgba(248,250,252,0.8)':'transparent'}">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span style="font-family:'SF Mono','Cascadia Code',monospace;color:#94a3b8;font-size:11px;min-width:60px;flex-shrink:0">${c.n}</span>
+          <span style="font-weight:600;color:#334155;flex:1;min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.p}</span>
+          <div style="display:flex;flex-wrap:wrap;gap:3px;flex-shrink:0">
+            ${teams.map(t=>teamAbbrChip(t)).join('')}
+            ${c.sub&&c.sub!=='RC'?badgeHTML(c.sub):''}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function renderStats(){
+  const data=ALL_DATA;
+  const teamCounts={};
+  data.forEach(d=>{
+    getCardPlayers(d).forEach(({team})=>{if(MLB_TEAMS.has(team))teamCounts[team]=(teamCounts[team]||0)+1;});
+  });
+  const allSortedTeams=Object.entries(teamCounts).sort((a,b)=>b[1]-a[1]);
+  const showAllTeams=!!state.statsShowAll["teams"];
+  const sortedTeams=showAllTeams?allSortedTeams:allSortedTeams.slice(0,15);
+  const maxTeam=allSortedTeams[0]?.[1]||1;
+
+  const playerCounts={};
+  data.forEach(d=>{splitPlayers(d.p).forEach(name=>{playerCounts[name]=(playerCounts[name]||0)+1;});});
+  const allSortedPlayers=Object.entries(playerCounts).sort((a,b)=>b[1]-a[1]);
+  const showAllPlayers=!!state.statsShowAll["players"];
+  const sortedPlayers=showAllPlayers?allSortedPlayers:allSortedPlayers.slice(0,15);
+  const maxPlayer=allSortedPlayers[0]?.[1]||1;
+
+  const rcCount=new Set(data.flatMap(d=>splitPlayers(d.p).filter(n=>isRC(n)))).size;
+  const autoCount=data.filter(d=>d.sub&&d.sub.startsWith("Auto")).length;
+
+  return `
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">
+    ${[["總卡數",data.length,"#6366f1"],["RC 新人卡",rcCount,"#f59e0b"],["簽名卡",autoCount,"#10b981"],["球隊數",[...new Set(data.map(d=>d.t).filter(t=>MLB_TEAMS.has(t)))].length,"#f97316"]]
+      .map(([label,val,color])=>`
+        <div style="display:flex;align-items:center;gap:8px;background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 14px">
+          <span style="font-size:12px;color:#64748b;white-space:nowrap">${label}</span>
+          <span style="font-family:'SF Mono','Cascadia Code',monospace;font-size:16px;font-weight:700;color:${color}">${val}</span>
+        </div>`).join("")}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px">
+    <!-- Team Ranking -->
+    <div style="background:#fff;border-radius:10px;padding:14px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:14px">球隊出現次數</div>
+      ${sortedTeams.map(([team,cnt],i)=>{
+        const color=getTeamColor(team),abbr=getTeamAbbr(team),w=Math.round(cnt/maxTeam*100);
+        const key='team:'+team,isOpen=!!state.statsExpanded[key];
+        const teamCards=data.filter(d=>getCardPlayers(d).some(({team:t})=>t===team));
+        return `<div style="margin-bottom:4px">
+          <div onclick="toggleStatsExpand('${key.replace(/'/g,"\\'")}') " style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;background:${isOpen?'rgba(99,102,241,0.06)':i%2===0?'#f8fafc':'transparent'};transition:background 0.15s">
+            <span style="font-size:10px;color:${isOpen?'#6366f1':'#94a3b8'};transition:transform 0.2s;transform:${isOpen?'rotate(90deg)':'rotate(0deg)'};display:inline-block;width:14px;text-align:center;flex-shrink:0">▶</span>
+            <span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:20px;padding:0 5px;border-radius:4px;background:${color};color:#fff;font-size:10px;font-weight:800;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.15)">${abbr}</span>
+            <span style="flex:1;font-size:12px;font-weight:500;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${team}</span>
+            <span style="font-size:12px;color:#94a3b8;font-weight:600;min-width:28px;text-align:right;font-family:'SF Mono','Cascadia Code',monospace">${cnt}</span>
+          </div>
+          <div style="margin-left:22px;margin-bottom:2px"><div style="height:6px;border-radius:3px;background:#f1f5f9;overflow:hidden"><div style="height:100%;border-radius:3px;width:${w}%;background:${color}cc;min-width:2px;transition:width 0.4s ease"></div></div></div>
+          ${isOpen?renderExpandedCards(teamCards,color):''}
+        </div>`;
+      }).join("")}
+      ${allSortedTeams.length>15?`<button onclick="toggleStatsShowAll('teams')" style="margin-top:8px;width:100%;padding:8px 0;border:1px dashed #cbd5e1;border-radius:6px;background:transparent;color:#6366f1;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">${showAllTeams?"收起（顯示前 15 支）":"展開全部（共 "+allSortedTeams.length+" 支球隊）"}</button>`:""}
+    </div>
+    <!-- Player Ranking -->
+    <div style="background:#fff;border-radius:10px;padding:14px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.06)">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:14px">球員出現次數</div>
+      ${sortedPlayers.map(([name,cnt],i)=>{
+        const team=PLAYER_TEAM[name]||"";
+        const color=getTeamColor(team),w=Math.round(cnt/maxPlayer*100);
+        const key='player:'+name,isOpen=!!state.statsExpanded[key];
+        const playerCards=data.filter(d=>splitPlayers(d.p).includes(name));
+        return `<div style="margin-bottom:4px">
+          <div onclick="toggleStatsExpand('${key.replace(/'/g,"\\'")}') " style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;background:${isOpen?'rgba(99,102,241,0.06)':i%2===0?'#f8fafc':'transparent'};transition:background 0.15s">
+            <span style="font-size:10px;color:${isOpen?'#6366f1':'#94a3b8'};transition:transform 0.2s;transform:${isOpen?'rotate(90deg)':'rotate(0deg)'};display:inline-block;width:14px;text-align:center;flex-shrink:0">▶</span>
+            ${team?teamAbbrChip(team):''}
+            <span onclick="event.stopPropagation();openModal('${name.replace(/'/g,"\\'")}') " style="flex:1;font-size:12px;font-weight:500;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;border-bottom:1px dashed #cbd5e1;display:inline-block;width:fit-content">${name}</span>
+            <span style="font-size:12px;color:#94a3b8;font-weight:600;min-width:24px;text-align:right;font-family:'SF Mono','Cascadia Code',monospace">${cnt}</span>
+          </div>
+          <div style="margin-left:22px;margin-bottom:2px"><div style="height:6px;border-radius:3px;background:#f1f5f9;overflow:hidden"><div style="height:100%;border-radius:3px;width:${w}%;background:${color}cc;min-width:2px;transition:width 0.4s ease"></div></div></div>
+          ${isOpen?renderExpandedCards(playerCards,color):''}
+        </div>`;
+      }).join("")}
+      ${allSortedPlayers.length>15?`<button onclick="toggleStatsShowAll('players')" style="margin-top:8px;width:100%;padding:8px 0;border:1px dashed #cbd5e1;border-radius:6px;background:transparent;color:#6366f1;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s">${showAllPlayers?"收起（顯示前 15 位）":"展開全部（共 "+allSortedPlayers.length+" 位球員）"}</button>`:""}
+    </div>
+  </div>`;
+}
+
+function renderModal(playerName){
+  const cards=ALL_DATA.filter(d=>splitPlayers(d.p).includes(playerName));
+  if(!cards.length) return "";
+  const singleCard=cards.find(d=>splitPlayers(d.p).length===1);
+  const team=PLAYER_TEAM[playerName]||(singleCard?singleCard.t:cards[0].t);
+  return `
+  <div onclick="if(event.target===this)closeModal()" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:flex;align-items:${state.isMobile?'flex-end':'center'};justify-content:center;padding:${state.isMobile?'0':'20px'};backdrop-filter:blur(4px)">
+    <div style="background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:${state.isMobile?'12px 12px 0 0':'16px'};width:100%;max-width:580px;max-height:${state.isMobile?'92vh':'85vh'};overflow-y:auto;padding:${state.isMobile?'20px 16px':'28px'};position:relative;box-shadow:0 25px 50px rgba(0,0,0,0.5)">
+      <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8">×</button>
+      <h2 style="margin:0 0 8px;font-size:${state.isMobile?18:22}px;font-family:Georgia,serif;color:#f1f5f9;padding-right:40px">${playerName}</h2>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+        ${teamBadgeHTML(team)}${isRC(playerName)?badgeHTML("RC"):""}
+      </div>
+      ${GROUP_ORDER.filter(g=>cards.some(c=>c.group===g)).map(g=>{
+        const gcol=GROUP_COLORS[g];
+        const bycat={};
+        cards.filter(c=>c.group===g).forEach(c=>{if(!bycat[c.cat])bycat[c.cat]=[];bycat[c.cat].push(c);});
+        return `<div style="margin-bottom:18px">
+          <h3 style="font-size:12px;font-weight:700;color:${gcol};margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid ${gcol}40;text-transform:uppercase;letter-spacing:0.5px">${g}</h3>
+          ${Object.entries(bycat).map(([cat,items])=>`
+            <div style="margin-bottom:10px;padding-left:8px">
+              <div style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px">${cat} (${items.length})</div>
+              ${items.map((c,i)=>{
+                const allPlayers=getCardPlayers(c);
+                return `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border-radius:6px;background:${i%2===0?"rgba(255,255,255,0.04)":"transparent"};font-size:12px">
+                  <span style="font-family:'SF Mono','Cascadia Code',monospace;color:#94a3b8;font-size:11px;min-width:60px;flex-shrink:0;padding-top:2px">${c.n}</span>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;flex-wrap:wrap;gap:4px">
+                      ${allPlayers.map(({name,team:pt})=>`
+                        <span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap">
+                          ${teamAbbrChip(pt)}
+                          <span style="font-size:11px;color:${name===playerName?"#e2e8f0":"#64748b"};font-weight:${name===playerName?600:400}">${name}</span>
+                        </span>`).join("")}
+                    </div>
+                  </div>
+                  ${c.sub&&c.sub!=="RC"?badgeHTML(c.sub):""}
+                </div>`;
+              }).join("")}
+            </div>`).join("")}
+        </div>`;
+      }).join("")}
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// MAIN RENDER
+// ============================================================
+function render(){
+  const filtered=getFiltered();
+  const isMobile=state.isMobile;
+
+  const ss=`padding:${isMobile?"7px 10px":"8px 12px"};border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:#1e293b;color:#f1f5f9;font-size:${isMobile?12:13}px;font-weight:500;outline:none;cursor:pointer;min-width:${isMobile?90:120}px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M2 4l4 4 4-4'/%3E%3C%2Fsvg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px`;
+
+  // Header
+  let html=`
+  <div style="padding:${isMobile?"16px 12px 12px":"24px 24px 18px"};border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(30,41,59,0.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100">
+    <div style="max-width:1200px;margin:0 auto">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:${isMobile?10:14}px;gap:10px">
+        <div>
+          <h1 style="margin:0 0 4px;font-size:${isMobile?20:26}px;font-family:Georgia,'Times New Roman',serif;color:#f1f5f9;letter-spacing:-0.5px">2025 Topps Cosmic Chrome Baseball</h1>
+          <p style="margin:0;font-size:${isMobile?11:13}px;color:#64748b">${ALL_DATA.length} 張卡片 · 3 大類 · ${ALL_TEAMS.length} 支球隊</p>
+        </div>
+        <div style="display:flex;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);flex-shrink:0">
+          ${[["list","清單"],["stats","統計"]].map(([v,label])=>`
+            <button onclick="setView('${v}')" style="padding:${isMobile?"7px 14px":"8px 18px"};border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;background:${state.view===v?"#6366f1":"rgba(255,255,255,0.04)"};color:${state.view===v?"#fff":"#94a3b8"};transition:all 0.2s">${label}</button>`).join("")}
+        </div>
+      </div>
+
+      <!-- Search + controls row -->
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <div style="position:relative;flex:1;min-width:${isMobile?120:200}px">
+          <input
+            id="search-input"
+            type="search"
+            inputmode="search"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="搜尋球員、球隊、卡號…"
+            value="${state.search.replace(/"/g,'&quot;')}"
+            style="width:100%;padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.04);color:#e2e8f0;font-size:${isMobile?16:14}px;outline:none;font-family:inherit"
+          >
+          ${state.search?`<button onclick="clearSearch()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748b;font-size:18px;line-height:1;padding:0">×</button>`:""}
+        </div>
+        <select onchange="setTeam(this.value)" style="${ss}">
+          <option value="All">全部球隊</option>
+          ${ALL_TEAMS.map(t=>`<option value="${t}" ${state.teamFilter===t?"selected":""}>${t}</option>`).join("")}
+        </select>
+        <select onchange="setSub(this.value)" style="${ss}">
+          <option value="All">全部類型</option>
+          ${ALL_SUBTYPES.map(s=>`<option value="${s}" ${state.subFilter===s?"selected":""}>${s}</option>`).join("")}
+        </select>
+        <select onchange="setSort(this.value)" style="${ss}">
+          <option value="number" ${state.sortBy==="number"?"selected":""}>卡號排序</option>
+          <option value="player" ${state.sortBy==="player"?"selected":""}>球員排序</option>
+          <option value="team" ${state.sortBy==="team"?"selected":""}>球隊排序</option>
+        </select>
+      </div>`;
+
+  // Group buttons
+  const groupCounts={};
+  GROUP_ORDER.forEach(g=>{groupCounts[g]=ALL_DATA.filter(d=>d.group===g).length;});
+  html+=`<div id="group-buttons" style="display:flex;gap:${isMobile?4:6}px;flex-wrap:wrap;margin-bottom:10px">
+    <button onclick="setGroup('All')" style="padding:${isMobile?"6px 10px":"7px 16px"};border-radius:8px;border:none;font-size:${isMobile?12:13}px;font-weight:700;cursor:pointer;font-family:inherit;background:${state.groupFilter==="All"?"#6366f1":"rgba(255,255,255,0.06)"};color:${state.groupFilter==="All"?"#fff":"#94a3b8"};transition:all 0.2s">
+      全部 ${!isMobile?`<span style="font-size:11px;opacity:0.7;margin-left:4px">${ALL_DATA.length}</span>`:""}
+    </button>
+    ${GROUP_ORDER.map(g=>`
+      <button onclick="setGroup('${g}')" style="padding:${isMobile?"6px 10px":"7px 16px"};border-radius:8px;border:none;font-size:${isMobile?12:13}px;font-weight:700;cursor:pointer;font-family:inherit;background:${state.groupFilter===g?GROUP_COLORS[g]:"rgba(255,255,255,0.06)"};color:${state.groupFilter===g?"#fff":"#cbd5e1"};transition:all 0.2s;${state.groupFilter!==g?"border-bottom:2px solid "+GROUP_COLORS[g]+"40":""}">
+        ${g} ${!isMobile?`<span style="font-size:11px;opacity:0.7;margin-left:4px">${groupCounts[g]}</span>`:""}
+      </button>`).join("")}
+    <span style="margin-left:auto;font-size:12px;color:#64748b;align-self:center">${filtered.length} / ${ALL_DATA.length} 張
+      ${(state.search||state.groupFilter!=="All"||state.teamFilter!=="All"||state.subFilter!=="All"||state.rcFilter!=="All")?`<button onclick="clearFilters()" style="margin-left:8px;padding:3px 10px;border-radius:6px;border:1px solid rgba(255,100,100,0.3);background:rgba(255,100,100,0.1);color:#f87171;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">清除</button>`:""}
+    </span>
+  </div>`;
+
+  // Sub-cat pills (shown when a group is selected)
+  if(state.groupFilter!=="All"){
+    const cats=GROUPS[state.groupFilter]||[];
+    const gcol=GROUP_COLORS[state.groupFilter]||"#6366f1";
+    html+=`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;padding-left:12px;border-left:3px solid ${gcol}60">
+      <button onclick="setSubCat('All')" style="padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);font-size:${isMobile?11:12}px;font-weight:600;cursor:pointer;font-family:inherit;background:${state.subCatFilter==="All"?"rgba(255,255,255,0.12)":"transparent"};color:${state.subCatFilter==="All"?"#e2e8f0":"#94a3b8"};transition:all 0.2s">全部子類別</button>
+      ${cats.map(c=>{
+        const active=state.subCatFilter===c;
+        const cnt=ALL_DATA.filter(d=>d.cat===c).length;
+        return `<button onclick="setSubCat('${c.replace(/'/g,"\\'")}') " style="padding:4px 12px;border-radius:999px;border:1px solid ${active?gcol+"60":"rgba(255,255,255,0.08)"};font-size:${isMobile?11:12}px;font-weight:600;cursor:pointer;font-family:inherit;background:${active?gcol+"22":"transparent"};color:${active?gcol:"#94a3b8"};transition:all 0.2s">${c} <span style="opacity:0.7;font-size:10px">${cnt}</span></button>`;
+      }).join("")}
+    </div>`;
+  }
+
+  // RC filter row
+  html+=`<div style="display:flex;gap:${isMobile?3:4}px;flex-wrap:wrap;margin-bottom:6px">
+    ${["All","RC","Non-RC"].map(v=>`<button onclick="setRcFilter('${v}')" style="padding:${isMobile?"5px 10px":"6px 14px"};border-radius:8px;border:1px solid ${state.rcFilter===v?"#f59e0b":"rgba(255,255,255,0.1)"};background:${state.rcFilter===v?"rgba(245,158,11,0.15)":"transparent"};color:${state.rcFilter===v?"#fcd34d":"#94a3b8"};font-size:${isMobile?11:12}px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.2s">${v==="All"?"全部 RC 狀態":v==="Non-RC"?"非 RC":"RC 新人卡"}</button>`).join("")}
+  </div>`;
+
+  html+=`</div></div>`;
+
+  // Main content
+  html+=`<div style="max-width:1200px;margin:0 auto;padding:${isMobile?'12px 10px':'20px'}">`;
+
+  if(state.view==="stats"){
+    html+=renderStats();
+  } else {
+    if(!filtered.length){
+      html+=`<div style="text-align:center;padding:60px 20px;color:#64748b">
+        <div style="font-size:48px;margin-bottom:12px">🔭</div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:8px">找不到相符的卡片</div>
+        <div style="font-size:13px">試試不同的搜尋條件</div>
+      </div>`;
+    } else if(isMobile){
+      // Mobile: stacked card layout
+      html+=`<div style="display:flex;flex-direction:column;gap:6px">`;
+      filtered.forEach((card,i)=>{
+        const gcolor=GROUP_COLORS[card.group]||"#6366f1";
+        const players=getCardPlayers(card);
+        const isCollected=!!state.collected[card.n+':'+card.cat];
+        html+=`<div onclick="openModal('${players[0].name.replace(/'/g,"\\'")}') " style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:${i%2===0?'rgba(255,255,255,0.04)':'transparent'};border:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background 0.15s" onmouseenter="this.style.background='rgba(99,102,241,0.08)'" onmouseleave="this.style.background='${i%2===0?'rgba(255,255,255,0.04)':'transparent'}'">
+          <span style="font-family:'SF Mono','Cascadia Code',monospace;color:#6366f1;font-size:11px;min-width:58px;flex-shrink:0">${card.n}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:#f1f5f9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${card.p}</div>
+            <div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;align-items:center">
+              ${cardTeamBadgesHTML(card)}
+              ${card.sub&&card.sub!=="RC"?badgeHTML(card.sub):""}
+              ${isRC(players[0].name)?badgeHTML("RC"):""}
+            </div>
+          </div>
+          <span style="width:6px;height:6px;border-radius:50%;background:${gcolor};flex-shrink:0;opacity:0.8"></span>
+        </div>`;
+      });
+      html+=`</div>`;
+    } else {
+      // Desktop: table layout
+      html+=`<div style="background:rgba(255,255,255,0.02);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06)">
+        <div style="display:grid;grid-template-columns:90px 1fr 200px 120px 100px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.08);font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px">
+          <span>卡號</span><span>球員</span><span>球隊</span><span>分類</span><span>類型</span>
+        </div>`;
+      filtered.forEach((card,i)=>{
+        const gcolor=GROUP_COLORS[card.group]||"#6366f1";
+        const players=getCardPlayers(card);
+        html+=`<div onclick="openModal('${players[0].name.replace(/'/g,"\\'")}') " style="display:grid;grid-template-columns:90px 1fr 200px 120px 100px;padding:9px 16px;border-bottom:1px solid rgba(255,255,255,0.04);background:${i%2===0?'rgba(255,255,255,0.02)':'transparent'};cursor:pointer;transition:background 0.12s;align-items:center" onmouseenter="this.style.background='rgba(99,102,241,0.06)'" onmouseleave="this.style.background='${i%2===0?'rgba(255,255,255,0.02)':'transparent'}'">
+          <span style="font-family:'SF Mono','Cascadia Code',monospace;color:#6366f1;font-size:12px">${card.n}</span>
+          <div style="display:flex;align-items:center;gap:6px;min-width:0">
+            <span style="font-size:13px;font-weight:500;color:#f1f5f9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${card.p}</span>
+            ${isRC(players[0].name)?badgeHTML("RC"):""}
+          </div>
+          <div style="overflow:hidden">${cardTeamBadgesHTML(card)}</div>
+          <div>${catBadgeHTML(card.cat,card.group)}</div>
+          <div>${card.sub&&card.sub!=="RC"?badgeHTML(card.sub):""}</div>
+        </div>`;
+      });
+      html+=`</div>`;
+    }
+  }
+
+  html+=`</div>`;
+
+  // Modal
+  if(state.modalPlayer) html+=renderModal(state.modalPlayer);
+
+  document.getElementById('root').innerHTML=html;
+
+  // CRITICAL: attach IME-safe search event listeners
+  attachSearchListeners();
+}
+
+// ============================================================
+// IME-SAFE SEARCH (fixes 注音/Chinese input on mobile)
+// ============================================================
+function attachSearchListeners(){
+  const input=document.getElementById('search-input');
+  if(!input) return;
+
+  // Track IME composition state
+  input.addEventListener('compositionstart',function(){
+    state.composing=true;
+  });
+
+  input.addEventListener('compositionend',function(e){
+    state.composing=false;
+    // Fire search AFTER composition ends (catches the final composed character)
+    state.search=e.target.value;
+    render();
+    // Re-focus and restore cursor after render
+    const el=document.getElementById('search-input');
+    if(el){
+      el.focus();
+      try{el.setSelectionRange(el.value.length,el.value.length);}catch(e){}
+    }
+  });
+
+  // Only search on input if NOT composing (prevents mid-composition renders)
+  input.addEventListener('input',function(e){
+    if(state.composing) return;
+    state.search=e.target.value;
+    render();
+    // Restore focus after render
+    const el=document.getElementById('search-input');
+    if(el){
+      el.focus();
+      try{el.setSelectionRange(el.value.length,el.value.length);}catch(e){}
+    }
+  });
+
+  // Handle Enter / Escape
+  input.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){
+      state.search='';
+      render();
+    }
+  });
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+function setSearch(v){state.search=v;render();}
+function clearSearch(){state.search='';render();}
+function setRcFilter(v){state.rcFilter=v;render();}
+function setGroup(g){state.groupFilter=g;state.subCatFilter="All";render();}
+function setSubCat(sc){state.subCatFilter=sc;render();}
+function setTeam(t){state.teamFilter=t;render();}
+function setSub(s){state.subFilter=s;render();}
+function setSort(s){state.sortBy=s;render();}
+function setView(v){state.view=v;render();}
+function openModal(p){state.modalPlayer=p;render();}
+function closeModal(){state.modalPlayer=null;render();}
+function toggleStatsExpand(key){state.statsExpanded[key]=!state.statsExpanded[key];render();}
+function toggleStatsShowAll(key){state.statsShowAll[key]=!state.statsShowAll[key];render();}
+function clearFilters(){
+  state.search="";state.groupFilter="All";state.subCatFilter="All";
+  state.teamFilter="All";state.subFilter="All";state.rcFilter="All";
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
